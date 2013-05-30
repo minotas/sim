@@ -1,0 +1,103 @@
+@CHARSET "ISO-8859-1";
+body { 
+    font-family: arial;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+}
+
+.imi_box_shadow{
+    margin: 30px auto 20px auto;
+    padding-top: 1px;
+    background: #fff;
+    min-width: 1200px;
+    width: 90%;
+    min-height: 500px;
+    height: 100%;
+}
+
+.sim_main_content {
+    margin: 30px auto 20px auto;
+    height: 100%;
+}
+
+.sim_box_shadow{
+    -webkit-box-shadow: 10px -10px 25px -10px #333333;
+    -moz-box-shadow: 10px -10px 25px -10px #333333;
+    box-shadow: 10px -10px 25px -10px #333333;
+    margin: 30px auto 20px auto;
+    padding-top: 1px;
+    background: #fff;
+    min-width: 1200px;
+    width: 90%;
+    min-height: 500px;
+    height: 100%;
+}
+
+.sim_header_left,  .sim_header_login{
+    color:#2e90bd;
+    height: 100px;
+    padding: 0 0 5px 0;
+    position: relative;
+    font-family:arial;
+    font-size:12px;
+}
+
+.sim_header_left{
+    background: url(imgs/banner.png) no-repeat;
+}
+.sim_header{
+    background: url(imgs/banner-right.png);
+}
+
+#sim_dropdown_login{
+}
+
+.sim_register{
+    position: absolute;
+    right: 24px;
+}
+
+#sim_form_login {
+    position: absolute;
+    right: 24px;
+	top: -10px;
+}
+#sim_form_register{
+    font-family: arial;
+    color: #3b9ec7;
+}
+
+#sim_form_register span{
+    padding: 0 50px 0 0;
+}
+
+.sim_label_form{
+    float: left;
+    width: 150px;
+}
+
+.sim_register{
+    float: left;
+    padding: 0 0 5px;
+    margin: 0;
+    font-family: arial;
+    float: center; 
+    margin-top: 10px;
+    color: black;
+}
+
+.ui-button-text .sim_login{
+    text-decoration: underline;
+    color:#2e90bd;
+    padding: 10 20 10 20px;
+    margin-left: 20px;
+}
+
+.ui-button-text .sim_main_menu{
+    text-decoration: none;
+    color:#2e90bd;
+    padding: 0 0 5px;
+    margin: 0;
+    font-family: arial;
+}
