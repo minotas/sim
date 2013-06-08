@@ -23,6 +23,8 @@ sim.authentication = function(){
     data_params.password = login_password;
     $.ajax({
         url: sim.rest_uri + 'login',
+        //contentType: 'application/json',
+       // dataType: "json",
         data: {jsondata: JSON.stringify(data_params)},
         type: 'POST',
         success : function(data) {
