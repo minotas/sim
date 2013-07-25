@@ -1,7 +1,7 @@
 var sim = { 
     roles : { guest: 'guest', user: 'user', admin : 'admin'},
     message_types : { information : 1, error: 2},
-    rest_uri : 'http://localhost:8080/SpesaInMano/',
+    rest_uri : 'http://localhost:8080/SpesaInMano/ws/',
     sections : {home: 1, alerts: 2, traffic: 3},
     timer : {value: 0}
     };
@@ -18,14 +18,14 @@ sim.load_home = function (){
 
 sim.authentication = function(){
     var data_params = {};
-    data_params.username = $('#login_username').val();
+    data_params.email = $('#login_username').val();
     var login_password = calcMD5($('#login_password').val());
     data_params.password = login_password;
     $.ajax({
         url: sim.rest_uri + 'login',
-        //contentType: 'application/json',
+        contentType: 'application/json',
        // dataType: "json",
-        data: {jsondata: JSON.stringify(data_params)},
+        data: JSON.stringify(data_params),
         type: 'POST',
         success : function(data) {
             if(data.username){

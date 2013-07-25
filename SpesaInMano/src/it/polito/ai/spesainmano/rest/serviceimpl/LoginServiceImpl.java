@@ -16,7 +16,7 @@ public class LoginServiceImpl implements LoginService{
 		User user;
 	
 			UserDAO userDao = new UserDAOImp();
-	        user = userDao.login(u.getUsername(), u.getPassword());
+	        user = userDao.login(u.getEmail(), u.getPassword());
 	
         return user;
 	}

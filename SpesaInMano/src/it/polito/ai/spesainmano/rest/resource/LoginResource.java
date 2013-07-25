@@ -28,7 +28,7 @@ private  LoginService loginService;
        @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
        @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public User login(User user) {
-		if(user.getUsername().equals("") || user.getPassword().equals("")){
+		if(user.getEmail().equals("") || user.getPassword().equals("")){
 			throw new CustomBadRequestException("Incomplete username or password");
 		}
     	loginService = new LoginServiceImpl();

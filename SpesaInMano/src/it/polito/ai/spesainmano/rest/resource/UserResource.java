@@ -30,17 +30,12 @@ private UserService userService;
        @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
        public User create(User user) throws SQLException
        {
-    	   if(user.getName() == null || user.getLastname() == null|| user.getEmail() == null  || user.getPassword() == null || user.getUsername() == null){
+    	   if(user.getName().equals("") || user.getLastname().equals("")|| user.getEmail().equals("")  || user.getPassword().equals("")){
     		 throw new RuntimeException("Incomplete Information about the user");  
     	   }
     	   
     	   UserDAO uDao = new UserDAOImp();
-    	   if(uDao.checkUsername(user.getUsername())){
-    		   
-    	   }
-    	   if(uDao.checkUsername(user.getUsername())){
-    		   
-    	   }
+    	
     	   
     	   if(uDao.checkEmail(user.getEmail())){
     		   

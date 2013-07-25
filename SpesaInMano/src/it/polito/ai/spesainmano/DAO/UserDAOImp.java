@@ -19,7 +19,6 @@ public class UserDAOImp implements UserDAO{
 			ps = con.prepareStatement(query);
 			ps.setString(1, u.getName());
 			ps.setString(2, u.getLastname());
-			ps.setString(3, u.getUsername());
 			ps.setString(4, u.getPassword());
 			ps.setString(5, u.getEmail());
 			ResultSet rs = ps.getGeneratedKeys();
@@ -51,14 +50,14 @@ public class UserDAOImp implements UserDAO{
 		return null;
 	}
 
-	public User login(String username, String password) throws SQLException {
+	public User login(String email, String password) throws SQLException {
 		User u = null;
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "SELECT id_user, name, lastname, points FROM USER WHERE username = ? and password = ?";
+		String query = "SELECT id_user, name, lastname, points FROM USER WHERE email = ? and password = ?";
 		try {
 			ps = con.prepareStatement(query);
-			ps.setString(1, username);
+			ps.setString(1, email);
 			ps.setString(2, password);
 			ResultSet rs = ps.executeQuery();
 			
@@ -79,11 +78,7 @@ public class UserDAOImp implements UserDAO{
 		return u;
 	}
 
-	@Override
-	public boolean checkUsername(String username) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 
 	@Override
 	public boolean checkEmail(String email) {

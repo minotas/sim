@@ -17,9 +17,9 @@ public interface UserDAO {
 	
 	public User findbyID(String id);
 	
-	public User login(String username, String password) throws SQLException;
+	public User login(String email, String password) throws SQLException;
 
-	public boolean checkUsername(String username);
+	
 
 	public boolean checkEmail(String email);
 	
