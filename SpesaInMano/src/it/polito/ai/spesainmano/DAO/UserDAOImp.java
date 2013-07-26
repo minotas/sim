@@ -14,13 +14,15 @@ public class UserDAOImp implements UserDAO{
 	public User insert(User u) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "insert into user(name, lastname, password, email, points) values(?, ?, ?, ?, 0)";
+		String query = "insert into user(name, lastname, password, email, points) values(?, ?, ?, ?, ?)";
 		try {
-			ps = con.prepareStatement(query);
+			ps = con.prepareStatement(query,  Statement.RETURN_GENERATED_KEYS);
 			ps.setString(1, u.getName());
 			ps.setString(2, u.getLastname());
-			ps.setString(4, u.getPassword());
-			ps.setString(5, u.getEmail());
+			ps.setString(3, u.getPassword());
+			ps.setString(4, u.getEmail());
+			ps.setInt(5, 0);
+			ps.executeUpdate();
 			ResultSet rs = ps.getGeneratedKeys();
 			if(rs.next()){
 	            // Update the id in the returned object. This is important as this value must be returned to the client.
@@ -28,7 +30,8 @@ public class UserDAOImp implements UserDAO{
 	            u.setId_user(id);
 			}
 		}catch (SQLException e) {
-			 throw e;
+		//System.out.print(e.getSQLState() + " " + e.getMessage()); 
+			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
@@ -69,7 +72,7 @@ public class UserDAOImp implements UserDAO{
 				u.setPoints(rs.getInt(4));
 			}
 		} catch (SQLException e) {
-			throw new SQLException("Server received an invalid response from upstream server");
+			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}

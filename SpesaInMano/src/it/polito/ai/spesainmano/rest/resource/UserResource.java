@@ -31,20 +31,20 @@ private UserService userService;
        public User create(User user) throws SQLException
        {
     	   if(user.getName().equals("") || user.getLastname().equals("")|| user.getEmail().equals("")  || user.getPassword().equals("")){
-    		   throw new RuntimeException("Incomplete Information about the user");  
+    		   throw new CustomBadRequestException("Incomplete Information about the user");  
     	   }
     	   
     	   try {   
     	   userService= new UserServiceImpl();
-    	   if(userService.checkEmail(user)){
-    		   return userService.create(user); 
-    	   }
-    	   else{
-    		   throw new CustomBadRequestException("There is another user registered with this email");
-    	   }
-          
+    	   return userService.create(user); 
+    	 
     	   } catch (SQLException e) {
-    			throw new CustomServiceUnavailableException(e.getMessage());
+    		   e.getErrorCode();
+    		   	if(e.getErrorCode() == 1062){
+    		   		throw new CustomBadRequestException("There is another user registered with this email");
+    		   	}
+    		   	throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
+    			
 			}
               
        }

@@ -7,12 +7,14 @@
 	<link href="theme/default/styles.css" type="text/css" rel="stylesheet" />
 	<link href="theme/default/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.js"></script>
 	<script type="text/javascript" src="js/md5.js"></script>
 	<script type="text/javascript" src="js/lib.js"></script>
+	
 </head>
 <body onload="sim.load_home();">
-	<div class="imi_box_shadow" style="background: white; position: relative">
+	<div class="sim_box_shadow" style="background: white; position: relative">
 		<header>
 			 <div class="sim_header">
 				<div class="sim_header_left" >
@@ -26,7 +28,26 @@
 		<footer>
 		</footer>
 		
-		<div id="imi_messages" style="display:none"></div>
+		<div id="sim_messages" style="display:none"></div>
+		<div id="sim_loading" style="display: none"></div>
+		
+		<!-- ************************** FORMS ***********************************************************-->
+        <div id="sim_form_register" style="display:none;">
+            <div class="sim_label_form"><span class="ui-button-text">First name: </span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_firstname" onKeyPress="return sim.validal(event)" /><span class="obligatory" id="firstname_label">*</span></div>
+            
+            <div class="sim_label_form"><span class="ui-button-text">Last name: </span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_lastname" onKeyPress="return sim.validal(event)" /><span class="obligatory" id="lastname_label">*</span></div>
+            
+            <div class="sim_label_form"><span class="ui-button-text">email: </span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_email" title="Enter your personal email. Will also be used to send you a login if you forget it."/><span class="obligatory" id="email_label">*</span></div>
+            
+            <div class="sim_label_form"><span class="ui-button-text">Password: </span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="password" id="register_password" title="The password have to contain a least 5 characters. In order to come it safe, you can mix number, upper case and lower case" /><span class="obligatory" id="password_label">*</span></div>
+            
+            <div class="sim_label_form"><span class="ui-button-text">Repeat password: </span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="password" id="register_repeat_password" title="Please enter the same password in both fields"/><span class="obligatory" id="rpassword_label">*</span></div>
+        </div>
 	</div>
 </body>
 </html>

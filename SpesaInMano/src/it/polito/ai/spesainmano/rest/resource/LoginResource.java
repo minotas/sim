@@ -38,7 +38,7 @@ private  LoginService loginService;
 				throw new CustomNotFoundException("Wrong username or password");
 			}
 		} catch (SQLException e) {
-			throw new CustomServiceUnavailableException(e.getMessage());
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
 		}
 		return usr;
 	}

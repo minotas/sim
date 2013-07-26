@@ -48,11 +48,9 @@ public class ConnectionPoolManager
 	{
 		while(!checkIfConnectionPoolIsFull())
 		{
-			System.out.println("Connection Pool is NOT full. Proceeding with adding new connections");
 			//Adding new connection instance until the pool is full
 			connectionPool.addElement(createNewConnectionForPool());
 		}
-		System.out.println("Connection Pool is full.");
 	}
 
 	private synchronized boolean checkIfConnectionPoolIsFull()
@@ -77,7 +75,6 @@ public class ConnectionPoolManager
 		{
 			Class.forName("com.mysql.jdbc.Driver");
 			connection = DriverManager.getConnection(databaseUrl, userName, password);
-			System.out.println("Connection: "+connection);
 		}
 		catch(SQLException sqle)
 		{
