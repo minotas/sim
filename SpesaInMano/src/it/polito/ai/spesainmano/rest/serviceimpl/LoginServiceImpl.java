@@ -13,12 +13,11 @@ public class LoginServiceImpl implements LoginService{
 
 	@Override
 	public User login(User u) throws SQLException {
+		
 		User user;
-	
-			UserDAO userDao = new UserDAOImp();
-	        user = userDao.login(u.getEmail(), u.getPassword());
-	
-        return user;
+		UserDAO userDao = new UserDAOImp();
+	    user = userDao.login(u.getEmail(), u.getPassword());
+	    return user;
 	}
 
 }

@@ -24,10 +24,8 @@ public class LoginResource {
       
 private  LoginService loginService;
       
-       @POST
-       @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-       @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public User login(User user) {
+    @POST
+    public User login(User user) {
 		if(user.getEmail().equals("") || user.getPassword().equals("")){
 			throw new CustomBadRequestException("Incomplete username or password");
 		}

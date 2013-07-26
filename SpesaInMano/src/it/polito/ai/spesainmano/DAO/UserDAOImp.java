@@ -14,7 +14,7 @@ public class UserDAOImp implements UserDAO{
 	public User insert(User u) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "insert into user(name, lastname, username, password, email, points) values(?, ?, ?, ?, ?, 0)";
+		String query = "insert into user(name, lastname, password, email, points) values(?, ?, ?, ?, 0)";
 		try {
 			ps = con.prepareStatement(query);
 			ps.setString(1, u.getName());
@@ -68,8 +68,6 @@ public class UserDAOImp implements UserDAO{
 				u.setLastname(rs.getString(3));
 				u.setPoints(rs.getInt(4));
 			}
-			
-			
 		} catch (SQLException e) {
 			throw new SQLException("Server received an invalid response from upstream server");
 		} finally{
@@ -81,8 +79,22 @@ public class UserDAOImp implements UserDAO{
 
 
 	@Override
-	public boolean checkEmail(String email) {
-		// TODO Auto-generated method stub
+	public boolean checkEmail(String email) throws SQLException{
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "select email from user where email = ?";
+		try {
+			ps = con.prepareStatement(query);
+			ps.setString(1, email);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				return true;
+			}
+		}catch (SQLException e) {
+			throw new SQLException("Server received an invalid response from upstream server");
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
 		return false;
 	}
 	

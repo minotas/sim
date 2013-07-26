@@ -19,8 +19,6 @@ public interface UserDAO {
 	
 	public User login(String email, String password) throws SQLException;
 
-	
-
-	public boolean checkEmail(String email);
+	public boolean checkEmail(String email) throws SQLException;
 	
 }

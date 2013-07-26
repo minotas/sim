@@ -15,4 +15,11 @@ public class UserServiceImpl implements UserService {
         return userDao.insert(u);
 	}
 
+	@Override
+	public boolean checkEmail(User user) throws SQLException {
+		UserDAO uDao = new UserDAOImp();
+  	    return uDao.checkEmail(user.getEmail());
+		
+	}
+
 }
