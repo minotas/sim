@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import it.polito.ai.spesainmano.model.User;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.UserService;
 import it.polito.ai.spesainmano.rest.serviceimpl.UserServiceImpl;
@@ -53,7 +54,11 @@ private UserService userService;
     	   try {   
     	   userService= new UserServiceImpl();
     	   int nid = Integer.parseInt(id);
-    	   return userService.getPoints(nid); 
+    	   int points = userService.getPoints(nid);
+    	   if(points < 0 ){
+    		   throw new CustomNotFoundException("User not found");
+    	   }
+    	   return points;
     	 
     	   } catch (SQLException e) {
     		   e.getErrorCode();

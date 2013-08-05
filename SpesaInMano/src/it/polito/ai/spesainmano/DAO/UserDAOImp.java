@@ -93,7 +93,7 @@ public class UserDAOImp implements UserDAO{
 				return true;
 			}
 		}catch (SQLException e) {
-			throw new SQLException("Server received an invalid response from upstream server");
+			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
@@ -112,12 +112,13 @@ public class UserDAOImp implements UserDAO{
 			if(rs.next()){
 				return rs.getInt(0);
 			}
+		
 		}catch (SQLException e) {
 			throw new SQLException("Server received an invalid response from upstream server");
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
-		return 0;
+		return -1;
 	}
 	
 }
