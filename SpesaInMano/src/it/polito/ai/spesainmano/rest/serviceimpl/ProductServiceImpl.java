@@ -16,9 +16,9 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
-	public Product getProduct(String barcode) throws SQLException {
+	public Product getProductByBarcode(String barcode) throws SQLException {
 		ProductDAO productDao = new ProductDAOImp();
-		return productDao.getProduct(barcode);
+		return productDao.getProductByBarcode(barcode);
 	}
 	
 }

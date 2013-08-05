@@ -10,6 +10,7 @@ public class Price {
 	Product id_product;
 	Date date;
 	int price;
+	String type;
 	
 	
 	public int getId_price() {
@@ -58,6 +59,14 @@ public class Price {
 	
 	public void setPrice(int price) {
 		this.price = price;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 }

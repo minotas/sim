@@ -2,14 +2,10 @@ package it.polito.ai.spesainmano.rest.resource;
 
 import java.sql.SQLException;
 
-import it.polito.ai.spesainmano.DAO.UserDAO;
-import it.polito.ai.spesainmano.DAO.UserDAOImp;
 import it.polito.ai.spesainmano.model.User;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
-import it.polito.ai.spesainmano.rest.service.LoginService;
 import it.polito.ai.spesainmano.rest.service.UserService;
-import it.polito.ai.spesainmano.rest.serviceimpl.LoginServiceImpl;
 import it.polito.ai.spesainmano.rest.serviceimpl.UserServiceImpl;
 
 import javax.ws.rs.Consumes;
@@ -37,6 +33,27 @@ private UserService userService;
     	   try {   
     	   userService= new UserServiceImpl();
     	   return userService.create(user); 
+    	 
+    	   } catch (SQLException e) {
+    		   e.getErrorCode();
+    		   	if(e.getErrorCode() == 1062){
+    		   		throw new CustomBadRequestException("There is another user registered with this email");
+    		   	}
+    		   	throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
+    			
+			}
+              
+       }
+       
+       @GET
+       @Path("/{id}")
+       @Produces({MediaType.APPLICATION_JSON})
+       public int getPoints(@PathParam("id") String id) throws SQLException
+       {
+    	   try {   
+    	   userService= new UserServiceImpl();
+    	   int nid = Integer.parseInt(id);
+    	   return userService.getPoints(nid); 
     	 
     	   } catch (SQLException e) {
     		   e.getErrorCode();

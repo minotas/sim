@@ -1,6 +1,8 @@
 package it.polito.ai.spesainmano.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Category {
 	
 	int id_category;

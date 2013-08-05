@@ -1,8 +1,7 @@
 package it.polito.ai.spesainmano.DAO;
 
 import it.polito.ai.spesainmano.model.User;
-import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
-import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
+
 
 import java.sql.*;
 
@@ -99,6 +98,26 @@ public class UserDAOImp implements UserDAO{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 		return false;
+	}
+
+	@Override
+	public int getPoints(int id) throws SQLException{
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "select points from user where id_user = ?";
+		try {
+			ps = con.prepareStatement(query);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				return rs.getInt(0);
+			}
+		}catch (SQLException e) {
+			throw new SQLException("Server received an invalid response from upstream server");
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+		return 0;
 	}
 	
 }

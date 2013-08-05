@@ -22,4 +22,10 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
+	@Override
+	public int getPoints(int id) throws SQLException {
+		UserDAO uDao = new UserDAOImp();
+		return uDao.getPoints(id);
+	}
+
 }

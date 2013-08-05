@@ -9,6 +9,6 @@ public interface ProductDAO {
 
 	public Product insert(Product p) throws SQLException;
 	
-	public Product getProduct(String barcode) throws SQLException;
+	public Product getProductByBarcode(String barcode) throws SQLException;
 	
 }

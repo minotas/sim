@@ -2,7 +2,6 @@ package it.polito.ai.spesainmano.rest.serviceimpl;
 
 import java.sql.SQLException;
 
-import javax.naming.ServiceUnavailableException;
 
 import it.polito.ai.spesainmano.DAO.UserDAO;
 import it.polito.ai.spesainmano.DAO.UserDAOImp;

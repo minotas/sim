@@ -2,7 +2,6 @@ package it.polito.ai.spesainmano.DAO;
 
 import java.sql.SQLException;
 
-import javax.naming.ServiceUnavailableException;
 
 import it.polito.ai.spesainmano.model.User;
 
@@ -19,6 +18,8 @@ public interface UserDAO {
 	
 	public User login(String email, String password) throws SQLException;
 
+	public int getPoints(int id)  throws SQLException;
+	
 	public boolean checkEmail(String email) throws SQLException;
 	
 }

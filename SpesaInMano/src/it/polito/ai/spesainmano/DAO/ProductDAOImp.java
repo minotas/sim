@@ -40,17 +40,17 @@ public class ProductDAOImp implements ProductDAO{
 	}
 
 	@Override
-	public Product getProduct(String barcode) throws SQLException {
+	public Product getProductByBarcode(String barcode) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		Product p = new Product();
+		Product p = null;
 		String query = "select (p.id_product, p.name, p.barcode, p.brand, p.quantity, p.measure_unit, p.image, c.id, c.name, pt.id_product_type, pt.name, pt.presentation) from product p, product_type pt, category c where pt.category=c.id_category and p.id_product_type=pt.id_product_type and p.barcode=?";
 		try {
 			ps = con.prepareStatement(query);
 			ps.setString(1, barcode);
 			ResultSet rs = ps.getGeneratedKeys();
 			if(rs.next()){
-	            // Update the id in the returned object. This is important as this value must be returned to the client.
+	          	p = new Product();
 				p.setId_product(rs.getInt(0));
 	            p.setName(rs.getString(1));
 	            p.setBarcode(rs.getString(2));

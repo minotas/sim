@@ -8,6 +8,6 @@ public interface ProductService {
 
 	Product create(Product p) throws SQLException;
 	
-	Product getProduct (String barcode) throws SQLException;
+	Product getProductByBarcode (String barcode) throws SQLException;
 	
 }
