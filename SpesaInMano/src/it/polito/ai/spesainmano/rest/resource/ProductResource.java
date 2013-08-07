@@ -7,11 +7,8 @@ import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException
 import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
 import it.polito.ai.spesainmano.rest.service.ProductService;
 import it.polito.ai.spesainmano.rest.serviceimpl.ProductServiceImpl;
-
 import java.sql.SQLException;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,11 +59,11 @@ public class ProductResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Product getProductByBarcode(@PathParam("barcode") String barcode, @Context HttpHeaders hh) {
 		
-		Map<String, Cookie> pathParams = hh.getCookies();
-		if(!pathParams.containsKey("name")){
+	/*	Map<String, Cookie> pathParams = hh.getCookies();
+		if(!pathParams.containsKey("id_user")){
 			  throw new CustomUnathorizedException("The user isn't logged in");
 		}
-		
+		*/
 		if (barcode.equals("")) {
 			throw new RuntimeException("Please insert a barcode");
 		}
@@ -80,8 +77,7 @@ public class ProductResource {
 			return p;
 
 		} catch (SQLException e) {
-			throw new CustomServiceUnavailableException(
-					"Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
 		}
 
 	}

@@ -8,7 +8,6 @@ import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.UserService;
 import it.polito.ai.spesainmano.rest.serviceimpl.UserServiceImpl;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,13 +17,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 @Path("/user")
-@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class UserResource {
       
 private UserService userService;
       
        @POST
+       @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+       @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
        public User create(User user) throws SQLException
        {
     	   if(user.getName().equals("") || user.getLastname().equals("")|| user.getEmail().equals("")  || user.getPassword().equals("")){

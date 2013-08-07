@@ -7,8 +7,8 @@ public class Supermarket {
 
 	int id_supermarket;
 	String name;
-	String longitude;
-	String latitude;
+	float longitude;
+	float latitude;
 	
 	
 	public int getId_supermarket() {
@@ -27,19 +27,19 @@ public class Supermarket {
 		this.name = name;
 	}
 	
-	public String getLongitude() {
+	public float getLongitude() {
 		return longitude;
 	}
 	
-	public void setLongitude(String longitude) {
+	public void setLongitude(float longitude) {
 		this.longitude = longitude;
 	}
 	
-	public String getLatitude() {
+	public float getLatitude() {
 		return latitude;
 	}
 	
-	public void setLatitude(String latitude) {
+	public void setLatitude(float latitude) {
 		this.latitude = latitude;
 	}
 	
