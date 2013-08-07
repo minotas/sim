@@ -12,14 +12,17 @@ import it.polito.ai.spesainmano.rest.serviceimpl.ProductTypeServiceImpl;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-@Path("/product")
+@Path("/productType")
 public class ProductTypeResource {
 
 	private ProductTypeService pts;
 	
 	@GET
 	@Path("/{categoryId}")
+	@Produces({ MediaType.APPLICATION_JSON })
 	public List<ProductType> getProductTypesByCategory(@PathParam("categoryId") String categoryId){
 	
 			pts = new ProductTypeServiceImpl();

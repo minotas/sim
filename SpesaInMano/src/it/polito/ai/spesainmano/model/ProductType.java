@@ -1,6 +1,8 @@
 package it.polito.ai.spesainmano.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class ProductType {
 	
 	int id_product_type;

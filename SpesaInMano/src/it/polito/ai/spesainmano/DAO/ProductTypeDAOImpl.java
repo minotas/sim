@@ -37,6 +37,7 @@ public class ProductTypeDAOImpl implements ProductTypeDAO {
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
+		return productTypes;
 	}
 
 }
