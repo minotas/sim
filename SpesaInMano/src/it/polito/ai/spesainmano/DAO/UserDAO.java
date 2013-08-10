@@ -21,5 +21,7 @@ public interface UserDAO {
 	public int getPoints(int id)  throws SQLException;
 	
 	public boolean checkEmail(String email) throws SQLException;
+
+	public boolean incrementPoints(int id_user) throws SQLException;
 	
 }

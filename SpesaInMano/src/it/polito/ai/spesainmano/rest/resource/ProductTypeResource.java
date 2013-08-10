@@ -20,13 +20,12 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
-@Path("/productType")
+@Path("category/{categoryId}/productType")
 public class ProductTypeResource {
 
 	private ProductTypeService pts;
 	
 	@GET
-	@Path("/{categoryId}")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<ProductType> getProductTypesByCategory(@PathParam("categoryId") String categoryId, @Context HttpHeaders hh){
 		Map<String, Cookie> pathParams = hh.getCookies();

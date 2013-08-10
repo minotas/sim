@@ -1,11 +1,13 @@
 package it.polito.ai.spesainmano.rest.resource;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 import it.polito.ai.spesainmano.model.User;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
 import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
 import it.polito.ai.spesainmano.rest.service.LoginService;
 import it.polito.ai.spesainmano.rest.serviceimpl.LoginServiceImpl;
 
@@ -13,6 +15,9 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 @Path("/login")
@@ -24,7 +29,7 @@ private  LoginService loginService;
       
     @POST
     public User login(User user) {
-		if(user.getEmail().equals("") || user.getPassword().equals("")){
+    	if(user.getEmail().equals("") || user.getPassword().equals("")){
 			throw new CustomBadRequestException("Incomplete username or password");
 		}
     	loginService = new LoginServiceImpl();

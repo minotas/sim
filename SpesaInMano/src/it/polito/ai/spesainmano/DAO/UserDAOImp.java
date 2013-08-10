@@ -3,6 +3,7 @@ package it.polito.ai.spesainmano.DAO;
 import it.polito.ai.spesainmano.model.User;
 
 
+
 import java.sql.*;
 
 import it.polito.ai.spesainmano.db.*;
@@ -29,7 +30,6 @@ public class UserDAOImp implements UserDAO{
 	            u.setId_user(id);
 			}
 		}catch (SQLException e) {
-		//System.out.print(e.getSQLState() + " " + e.getMessage()); 
 			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
@@ -114,11 +114,33 @@ public class UserDAOImp implements UserDAO{
 			}
 		
 		}catch (SQLException e) {
-			throw new SQLException("Server received an invalid response from upstream server");
+			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 		return -1;
+	}
+
+	@Override
+	public boolean incrementPoints(int id_user) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "update user set points = points + 5 where id_user = ?";
+		try {
+			
+			ps = con.prepareStatement(query);
+			ps.setInt(1, id_user);
+			
+			if(ps.executeUpdate() > 0){
+				return true;
+			} 
+			
+		}catch (SQLException e) {
+			throw e;
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+		return false;
 	}
 	
 }

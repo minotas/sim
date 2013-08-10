@@ -1,6 +1,7 @@
 package it.polito.ai.spesainmano.rest.serviceimpl;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import it.polito.ai.spesainmano.DAO.ProductDAO;
 import it.polito.ai.spesainmano.DAO.ProductDAOImp;
@@ -19,6 +20,12 @@ public class ProductServiceImpl implements ProductService{
 	public Product getProductByBarcode(String barcode) throws SQLException {
 		ProductDAO productDao = new ProductDAOImp();
 		return productDao.getProductByBarcode(barcode);
+	}
+
+	@Override
+	public List<Product> getProductByProductType(int productTypeId) throws SQLException {
+		ProductDAO productDao = new ProductDAOImp();
+		return productDao.getProductsByProductType(productTypeId);
 	}
 	
 }

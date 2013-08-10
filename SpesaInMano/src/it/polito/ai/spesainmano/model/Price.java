@@ -9,7 +9,7 @@ public class Price {
 	Supermarket id_supermarket;
 	Product id_product;
 	Date date;
-	int price;
+	float price;
 	String type;
 	
 	
@@ -53,11 +53,11 @@ public class Price {
 		this.date = date;
 	}
 	
-	public int getPrice() {
+	public float getPrice() {
 		return price;
 	}
 	
-	public void setPrice(int price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 

@@ -1,6 +1,7 @@
 package it.polito.ai.spesainmano.rest.resource;
 
 import it.polito.ai.spesainmano.model.Supermarket;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
 import it.polito.ai.spesainmano.rest.service.SupermarketService;
@@ -35,7 +36,11 @@ public class SupermarketResource {
 		}
 		try {
 			ss = new SupermarketServiceImpl();
-			return ss.checkIn(latitude, longitude);
+			List<Supermarket> supermarkets = ss.checkIn(latitude, longitude);
+			if(supermarkets.size() == 0){
+				throw new CustomNotFoundException("You aren't in a supermarket");
+			}
+			else return supermarkets;
 		
 		} catch (SQLException e) {
 		 	throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
