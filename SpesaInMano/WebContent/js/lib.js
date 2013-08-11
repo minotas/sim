@@ -25,7 +25,7 @@ $(function() {
 var sim = { 
     roles : { guest: 'guest', user: 'user'},
     message_types : { information : 1, error: 2},
-    rest_uri : 'http://localhost:8080/SpesaInMano/ws/',
+    rest_uri : 'http://192.168.1.130:8080/SpesaInMano/ws/',
     sections : {home: 1},
     timer : {value: 0}
     };
@@ -105,6 +105,7 @@ sim.authentication = function(){
         	console.log(data);
             if(data.id_user){
             	$.cookie('name', ''+data.name);
+            	var cookieValue = $.cookie("name");
             	$.cookie('lastname', ''+data.lastname);
                 sim.current_rol = sim.roles.user;
                 sim.change_auth();

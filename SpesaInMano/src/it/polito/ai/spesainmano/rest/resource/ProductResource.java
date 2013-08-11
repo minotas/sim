@@ -40,7 +40,7 @@ public class ProductResource {
 			  throw new CustomUnathorizedException("The user isn't logged in");
 		}
        
- 	   if(p.getName().equals("") || p.getBarcode().equals("")|| p.getBrand().equals("")  || p.getMeasure_unit().equals("") || p.getQuantity().equals("") || p.getImage().equals("")){
+ 	   if(p.getName().equals("") || p.getBarcode().equals("")|| p.getBrand().equals("")  || p.getMeasure_unit().equals("") || p.getQuantity().equals("")){
  		 throw new CustomBadRequestException("Incomplete Information about the product");  
  	   }
  	   

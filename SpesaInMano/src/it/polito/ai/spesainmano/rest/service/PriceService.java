@@ -11,5 +11,7 @@ public interface PriceService {
 	List<Price> insert(Price p) throws SQLException;
 	
 	boolean checkPrice(Price p) throws SQLException, CustomBadRequestException;
+
+	float getAverageLastSixMonths(int productId, int supermarketId) throws SQLException;
 	
 }

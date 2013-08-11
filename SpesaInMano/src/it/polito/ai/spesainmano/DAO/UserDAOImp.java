@@ -4,6 +4,7 @@ import it.polito.ai.spesainmano.model.User;
 
 
 
+
 import java.sql.*;
 
 import it.polito.ai.spesainmano.db.*;
@@ -78,28 +79,6 @@ public class UserDAOImp implements UserDAO{
 		return u;
 	}
 
-
-
-	@Override
-	public boolean checkEmail(String email) throws SQLException{
-		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
-		PreparedStatement ps = null;
-		String query = "select email from user where email = ?";
-		try {
-			ps = con.prepareStatement(query);
-			ps.setString(1, email);
-			ResultSet rs = ps.executeQuery();
-			if(rs.next()){
-				return true;
-			}
-		}catch (SQLException e) {
-			throw e;
-		} finally{
-			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
-		}
-		return false;
-	}
-
 	@Override
 	public int getPoints(int id) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
@@ -142,5 +121,7 @@ public class UserDAOImp implements UserDAO{
 		}
 		return false;
 	}
-	
+
+
+
 }

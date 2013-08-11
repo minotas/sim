@@ -40,4 +40,18 @@ public class ProductTypeDAOImpl implements ProductTypeDAO {
 		return productTypes;
 	}
 
+	@Override
+	public int getIdByName(String name) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "SELECT id_product_type FROM product_type WHERE name = ?";
+		ps = con.prepareStatement(query);
+		ps.setString(1, name);
+		ResultSet rs = ps.executeQuery();
+		if(rs.next()){
+			return rs.getInt(1);			
+		}
+		return 0;
+	}
+
 }

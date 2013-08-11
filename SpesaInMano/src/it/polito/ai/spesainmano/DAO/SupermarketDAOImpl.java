@@ -29,8 +29,8 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 				Supermarket s = new Supermarket();
 				s.setId_supermarket(rs.getInt(1));
 				s.setName(rs.getString(2));
-				s.setLatitude(rs.getFloat(3));
-				s.setLongitude(rs.getFloat(4));
+				s.setLatitude(rs.getFloat(4));
+				s.setLongitude(rs.getFloat(3));
 				supermarkets.add(s);
 			}
 		} catch (SQLException e) {

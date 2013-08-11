@@ -29,6 +29,7 @@ private  LoginService loginService;
       
     @POST
     public User login(User user) {
+    	
     	if(user.getEmail().equals("") || user.getPassword().equals("")){
 			throw new CustomBadRequestException("Incomplete username or password");
 		}

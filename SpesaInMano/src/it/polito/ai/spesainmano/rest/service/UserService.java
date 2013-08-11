@@ -10,5 +10,4 @@ public interface UserService {
 	
 	int getPoints(int id) throws SQLException;
 
-	boolean checkEmail(User u) throws SQLException;
 }

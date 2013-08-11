@@ -19,7 +19,7 @@ public class ProductDAOImp implements ProductDAO{
 		PreparedStatement ps = null;
 		String query = "insert into product(id_product_type, name, barcode, brand, quantity, measure_unit, image) values(?, ?, ?, ?, ?, ?, ?)";
 		try {
-			ps = con.prepareStatement(query);
+			ps = con.prepareStatement(query,  Statement.RETURN_GENERATED_KEYS);
 			ps.setInt(1, p.getId_product_type().getId_product_type());
 			ps.setString(2, p.getName());
 			ps.setString(3, p.getBarcode());
@@ -27,6 +27,7 @@ public class ProductDAOImp implements ProductDAO{
 			ps.setString(5, p.getQuantity());
 			ps.setString(6, p.getMeasure_unit());
 			ps.setString(7, p.getImage());
+			ps.executeUpdate();
 			ResultSet rs = ps.getGeneratedKeys();
 			if(rs.next()){
 	            // Update the id in the returned object. This is important as this value must be returned to the client.

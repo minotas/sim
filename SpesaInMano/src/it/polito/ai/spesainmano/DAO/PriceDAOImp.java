@@ -26,7 +26,7 @@ public class PriceDAOImp implements PriceDAO{
 			ps.setInt(2, p.getId_supermarket().getId_supermarket());
 			ps.setInt(3, p.getId_product().getId_product());
 			ps.setDate(4, (Date) p.getDate());
-			ps.setInt(5, p.getPrice());
+			ps.setFloat(5, p.getPrice());
 			ps.setString(6, p.getType());
 			return ps.executeUpdate();
 			
@@ -35,13 +35,14 @@ public class PriceDAOImp implements PriceDAO{
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
-		return p;
+	
 	}
 
 	@Override
 	public float[] checkPrice(Price p) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
+		
 		String query = "select avg (price), std(price) from (select * from price where id_supermarket=? and id_product=? order by date desc limit 10)AS last_ten_prices";
 		try {
 			ps = con.prepareStatement(query);
@@ -72,7 +73,7 @@ public class PriceDAOImp implements PriceDAO{
 	public List<Price> getProductPriceInNearSupermarkets(Price p) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "Select max(p.id_price), p.date, p.type, p.price, s.name, s.longitude, s.latitude from price p, supermarket s where p.id_product = ? p.id_supermarket = s.id_supermarket and SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120<=1000 and p.id_supermarket != ? or p.id_supermarket Select max(p.id_price), p.date, p.type, p.price, s.name, s.longitude, s.latitude"+ 
+		String query = " Select max(p.id_price), p.date, p.type, p.price, s.name, s.longitude, s.latitude"+ 
 						"from price p, supermarket s" +  
 						"where p.id_product = ? and p.id_supermarket = s.id_supermarket and p.id_supermarket != ?" + 
 						"and ((SQRT(POWER((s.longitude-?),2)+POWER((s.latitude-?),2))*111120<=1000) or (p.id_supermarket in("+
@@ -118,6 +119,24 @@ public class PriceDAOImp implements PriceDAO{
 			 throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+	}
+
+	@Override
+	public float getAverageLastSixMonths(int productId, int supermarketId) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = ("select avg(price) from price where id_product = ? and id_supermarket = ? and date > date(now()) - 180");
+		ps = con.prepareStatement(query);
+		ps.setInt(1, productId);
+		ps.setInt(2, supermarketId);
+		ResultSet rs = ps.executeQuery();
+		
+		if(rs.next()){
+			return rs.getFloat(1);
+		}
+		else{ 
+			return -1;
 		}
 	}
 }

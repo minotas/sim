@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ProductTypeDAO {
 	
-	public List<ProductType> getProductTypesByCategory(int categoryId) throws SQLException; 
+	public List<ProductType> getProductTypesByCategory(int categoryId) throws SQLException;
+
+	public int getIdByName(String name) throws SQLException; 
 
 }

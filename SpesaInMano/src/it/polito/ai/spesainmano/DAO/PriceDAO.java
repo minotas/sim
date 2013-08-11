@@ -12,5 +12,7 @@ public interface PriceDAO {
 	public float[] checkPrice (Price p) throws SQLException;
 
 	public List<Price> getProductPriceInNearSupermarkets(Price p) throws SQLException;
+
+	public float getAverageLastSixMonths(int productId, int supermarketId) throws SQLException;
 	
 }

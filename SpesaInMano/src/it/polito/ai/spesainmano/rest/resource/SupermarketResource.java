@@ -34,6 +34,7 @@ public class SupermarketResource {
 		if(!pathParams.containsKey("id_user")){
 			  throw new CustomUnathorizedException("The user isn't logged in");
 		}
+		
 		try {
 			ss = new SupermarketServiceImpl();
 			List<Supermarket> supermarkets = ss.checkIn(latitude, longitude);

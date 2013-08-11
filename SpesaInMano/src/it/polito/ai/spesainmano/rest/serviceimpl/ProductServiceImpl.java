@@ -5,6 +5,10 @@ import java.util.List;
 
 import it.polito.ai.spesainmano.DAO.ProductDAO;
 import it.polito.ai.spesainmano.DAO.ProductDAOImp;
+import it.polito.ai.spesainmano.DAO.ProductTypeDAO;
+import it.polito.ai.spesainmano.DAO.ProductTypeDAOImpl;
+import it.polito.ai.spesainmano.DAO.UserDAO;
+import it.polito.ai.spesainmano.DAO.UserDAOImp;
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.rest.service.ProductService;
 
@@ -12,6 +16,8 @@ public class ProductServiceImpl implements ProductService{
 
 	@Override
 	public Product create(Product p) throws SQLException {
+		ProductTypeDAO ptDao = new ProductTypeDAOImpl();
+		p.getId_product_type().setId_product_type(ptDao.getIdByName(p.getId_product_type().getName()));
 		ProductDAO productDao = new ProductDAOImp();
         return productDao.insert(p);
 	}
