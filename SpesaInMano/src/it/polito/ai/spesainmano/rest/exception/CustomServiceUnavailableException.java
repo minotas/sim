@@ -9,6 +9,11 @@ import com.sun.jersey.api.Responses;
 public class CustomServiceUnavailableException extends WebApplicationException{
 
 		  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8626297657296994121L;
+
+		/**
 		  * Create a HTTP 503 (Service Unavailable) exception.
 		  * @param message the String that is the entity of the 503 response.
 		  */

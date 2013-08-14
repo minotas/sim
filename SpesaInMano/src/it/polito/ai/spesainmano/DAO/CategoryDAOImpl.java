@@ -15,26 +15,38 @@ public class CategoryDAOImpl implements CategoryDAO {
 	
 	@Override
 	public List<Category> getCategories() throws SQLException {
+		
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		String query = "SELECT id_category, name FROM Category";
 		List<Category> categories = new ArrayList<Category>();
+	
 		try {
+		
 			ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()){
+		
 				Category c = new Category();
 				c.setId_category(rs.getInt(1));
 				c.setName(rs.getString(2));
 				categories.add(c);
+			
 			}
+		
 		} catch (SQLException e) {
+		
 			throw e;
+		
 		} finally{
+	
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+	
 		}
+	
 		return categories;
+	
 	}
 
 }

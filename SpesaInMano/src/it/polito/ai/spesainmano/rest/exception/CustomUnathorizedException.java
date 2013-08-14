@@ -6,6 +6,11 @@ import javax.ws.rs.core.Response.Status;
 
 public class CustomUnathorizedException extends WebApplicationException{
 	 /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4153632079795298726L;
+
+	/**
 	  * Create a HTTP 401 (Bad Unauthorized) exception.
 	  * @param message the String that is the entity of the 401 response.
 	  */

@@ -6,6 +6,11 @@ import javax.ws.rs.core.Response.Status;
 
 public class CustomBadRequestException extends WebApplicationException{
 	 /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5411772313826249379L;
+
+	/**
 	  * Create a HTTP 400 (Bad Request) exception.
 	  * @param message the String that is the entity of the 400 response.
 	  */

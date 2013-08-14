@@ -15,31 +15,46 @@ import it.polito.ai.spesainmano.rest.service.PriceService;
 public class PriceServiceImpl implements PriceService{
 
 	@Override
-	public List<Price> insert(Price p) throws SQLException {
-		PriceDAO priceDao = new PriceDAOImp();
-        if(priceDao.insert(p) > 0){
-        	UserDAO userDao = new UserDAOImp();
-        	userDao.incrementPoints(p.getId_user().getId_user());
-        	List<Price> prices = priceDao.getProductPriceInNearSupermarkets(p);
-        	return prices;
-        }
-        else{
-        	throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
-        }
-        
+	public void validate(Price p) throws CustomBadRequestException {
+		 if(p.getId_user().getId_user()==0 || p.getId_supermarket().getId_supermarket()==0 || p.getId_product().getId_product()==0  || p.getPrice()==0 || p.getType().equals("")){
+	 		 throw new CustomBadRequestException("Incomplete Information about the price");  
+	 	   }
+		
 	}
 
 	@Override
-	public boolean checkPrice(Price p) throws SQLException {
+	public List<Price> insert(Price p) throws CustomServiceUnavailableException{
+		PriceDAO priceDao = new PriceDAOImp();
+        try {
+			if(priceDao.insert(p) > 0){
+				UserDAO userDao = new UserDAOImp();
+				userDao.incrementPoints(p.getId_user().getId_user());
+				List<Price> prices = priceDao.getProductPriceInNearSupermarkets(p);
+				return prices;
+			}
+			else{
+				throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			}
+		} catch (SQLException e) {
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		}
+	}
+
+	@Override
+	public boolean checkPrice(Price p)throws CustomBadRequestException, CustomServiceUnavailableException{
 		int credibility, points;
 		float price = p.getPrice();
 		
-		if(p.getPrice() == 0){
-			throw new CustomBadRequestException("The price cannot be 0");
+		if(p.getPrice() <= 0){
+			throw new CustomBadRequestException("The price cannot must be a positive value");
 		}
 		
 		UserDAO userDao = new UserDAOImp();
-		points = userDao.getPoints(p.getId_user().getId_user());
+		try {
+			points = userDao.getPoints(p.getId_user().getId_user());
+		} catch (SQLException e) {
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		}
 		if(points < 100){
 			credibility = 1;
 		}
@@ -53,7 +68,12 @@ public class PriceServiceImpl implements PriceService{
 		}
 		
 		PriceDAO priceDao = new PriceDAOImp();
-		float[] data = priceDao.checkPrice(p);
+		float[] data;
+		try {
+			data = priceDao.checkPrice(p);
+		} catch (SQLException e) {
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		}
 		
 		float avg, std;
 		avg = data[0];
@@ -92,11 +112,16 @@ public class PriceServiceImpl implements PriceService{
 
 	
 	@Override
-	public float getAverageLastSixMonths(int productId, int supermarketId) throws SQLException {
+	public float getAverageLastSixMonths(int productId, int supermarketId)throws CustomServiceUnavailableException {
 		float average;
 		PriceDAO priceDao = new PriceDAOImp();
-		average = priceDao.getAverageLastSixMonths(productId, supermarketId);
+		try {
+			average = priceDao.getAverageLastSixMonths(productId, supermarketId);
+		} catch (SQLException e) {
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		}
 		return average;
 	}
+
 
 }

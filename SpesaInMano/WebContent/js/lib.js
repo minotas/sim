@@ -1,16 +1,24 @@
 $(function() {
-    $('#sim_content_menu div').mouseover(function(){
-        $(this).addClass('sim_menu_over');
-    });
-    $('#sim_content_menu div').mouseout(function(){
-        $(this).removeClass('sim_menu_over');
-    });
+	$( document ).on( "mouseenter", "#sim_categories div", function() {
+		$(this).addClass('sim_menu_over');
+	});
+	$(document).on( "mouseleave", "#sim_categories div", function() {
+		$(this).removeClass('sim_menu_over');
+	});
+	$(document).on("mouseleave", "div[id^='toggle_']", function(){
+		
+		$(".sim_dropdown_toggle").toggle(false);
+	});
+	$(document).on("mouseenter", "#sim_header", function(){
+		
+		$(".sim_dropdown_toggle").toggle(false);
+	});
     $('#sim_messages').dialog({  title: "Information",
         autoOpen: false,
         height: 380,
         width: 550,
         modal: true,
-        buttons: { "ok": function() { $(this).dialog("close"); } } });
+        buttons: { "ok": function() { $(this).dialog("close"); sim.loading(false);} } });
     $('#sim_form_register').dialog({  title: "Register",
                                    autoOpen: false,
                                    height: 380,
@@ -18,6 +26,7 @@ $(function() {
                                    modal: true,
                                    buttons: { "send": function() { sim.clean_register(); var flag = sim.valida_form_register(); if(!flag){sim.new_user();} },
                                            "cancel": function() { $(this).dialog("close"); } } });
+    
     sim.getuser();
 });    
 
@@ -25,13 +34,14 @@ $(function() {
 var sim = { 
     roles : { guest: 'guest', user: 'user'},
     message_types : { information : 1, error: 2},
-    rest_uri : 'http://192.168.1.130:8080/SpesaInMano/ws/',
+    rest_uri : 'http://localhost:8080/SpesaInMano/ws/',
     sections : {home: 1},
     timer : {value: 0}
     };
 
 sim.current_rol = sim.roles.guest;
 sim.current_section = sim.sections.home;
+sim.current_name_section = '';
 
 /******************** USER FUNCTIONS *******************************/
 sim.new_user = function () {
@@ -105,14 +115,13 @@ sim.authentication = function(){
         	console.log(data);
             if(data.id_user){
             	$.cookie('name', ''+data.name);
-            	var cookieValue = $.cookie("name");
             	$.cookie('lastname', ''+data.lastname);
+            	$.cookie('id_user', data.id_user);
                 sim.current_rol = sim.roles.user;
                 sim.change_auth();
-            	var html = 'You are authenticated as <i>'+data.name + ' '+data.lastname+'</i> ';
+            	var html = 'Welcome Mr./Ms.: '+data.name + ' '+data.lastname+'</i> ';
                 html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
                 $('#sim_form_login').html(html);
-               
                 sim.load_home();
             }
             else{
@@ -122,11 +131,6 @@ sim.authentication = function(){
         error:function(data){
         	sim.print_message(data.responseText, sim.message_types.error);
         }
-       /* statusCode : {
-            404 : function(){sim.print_message("user not found", sim.message_types.error);},
-            400: function(){sim.print_message("empty fields", sim.message_types.error);},
-            501: function(){sim.print_message("Internal error", sim.message_types.error);}
-        }*/
     });
 };
 
@@ -140,10 +144,122 @@ sim.change_auth = function(){
     switch(sim.current_rol){
     case sim.roles.guest:
     	$('#sim_form_login').html(tpl_form_login);
+    	$('#sim_cart').hide();
+    	$("#sim_categories").hide();
+    	$('#sim_body_body').hide();
+    	$('#sim_body_menu').hide();
+    	$('#sim_nav').hide();
 		break;
     case sim.roles.user:
+		sim.loading(false);
+		$('#sim_cart').show();
+		$("#sim_categories").show();
+		$("#sim_body_offers").show();
+		sim.get_categories();
+		sim.get_offers();
         break; 
     }
+};
+
+sim.get_offers = function(){
+	$("#sim_body_offers").append(tpl_product);
+	$("#sim_body_offers").append(tpl_product);
+	//$("#sim_body_products").show();
+};
+
+sim.get_categories = function(){
+	$("#sim_categories").html('');
+	$("#sim_categories").append('<div onclick="">Offers<div id="uno" style="display:none;">uno hola</div></div>');
+    $.ajax({
+        url: sim.rest_uri + 'category',
+        type: 'GET',
+        success : function(data) {
+        	console.log(data.category[1]);
+            if(data.category.length > 0){
+            	sim.load_categories(data);
+            }
+            else{
+                sim.print_message(data, sim.message_types.error);
+            }
+        },
+        error:function(data){
+        	sim.print_message(data.responseText, sim.message_types.error);
+        }
+    });
+};
+
+sim.load_categories = function (data){
+    var category_obj;
+    for(var i = 0; i < data.category.length; i++){
+        category_obj = data.category[i];
+        $('#sim_categories').append(tpl_categories(category_obj));
+    }
+};
+
+sim.get_subcategory = function(id){
+	sim.current_subcategory = id;
+	console.log(id);
+	$.ajax({
+        url: sim.rest_uri + 'category/' + id + '/productType/',
+        type: 'GET',
+        success : function(data) {
+        	
+            if(data.productType.length > 0){
+            	sim.load_subcategories(data, id);
+            	sim.load_subcategories_menu(data);
+            }
+            else{
+                sim.print_message(data, sim.message_types.error);
+            }
+        },
+        error:function(data){
+        	sim.print_message(data.responseText, sim.message_types.error);
+        }
+    });
+};
+
+sim.load_subcategories = function(data, id){
+	$(".sim_dropdown_toggle").toggle(false);
+	$('#toggle_'+id).html('');
+	$('#toggle_'+id).append(tpl_subcategory(data));
+	$("#toggle_"+id).toggle();
+};
+
+sim.load_subcategories_menu = function(data){
+	$("#sim_body_menu").html('');
+	$('#sim_body_menu').append('<span>Categories</span>');
+	$('#sim_body_menu').append(tpl_subcategory(data));
+};
+
+sim.get_subcategory_products = function(id, name){
+	$(".sim_dropdown_toggle").toggle(false);
+	$('#sim_nav').html('<span>'+name+'</span>');
+	$("#sim_body_offers").hide();
+	$('#sim_body_body').show();
+	$('#sim_nav').show();
+	$("#sim_body_menu").show();
+	$("#sim_body_products").append(tpl_product);
+	$("#sim_body_products").show();
+	var data_param = {};
+	data_param.productType = id;
+	/*$.ajax({
+        url: sim.rest_uri + 'product',
+        type: 'GET',
+        data: JSON.stringify(data_param),
+        success : function(data) {
+        	console.log(data);
+            /*if(data.productType.length > 0){
+            	sim.load_subcategories(data, id);
+            }
+            else{
+            	//$('#sim_categories').html(data);
+                sim.print_message(data, sim.message_types.error);
+            }
+        },
+        error:function(data){
+        	sim.print_message(data.responseText, sim.message_types.error);
+        }
+    });*/
 };
 
 sim.logout = function(){
@@ -160,7 +276,7 @@ sim.getuser = function(){
 		var name = $.cookie('name');
 		var lastname = $.cookie('lastname');
 		sim.current_rol = sim.roles.user;
-		var html = 'You are authenticated as <i>'+name + ' '+lastname+'</i> ';
+		var html = 'Welcome Mr./Ms.: <i>'+name + ' '+lastname+'</i> ';
         html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
         $('#sim_form_login').html(html);
 	}
@@ -214,7 +330,7 @@ sim.valida_form_register = function(){
         $('.sim_input_form #lastname_label').text('field alfanumeric and obligatory');
         flag = true;
     }
-    if($('#register_email').val() != '' && !sim.validaEmail($('#register_email').val())){
+    if($('#register_email').val() == '' || !sim.validaEmail($('#register_email').val())){
         $('.sim_input_form #email_label').text('Please enter a valid email');
         flag = true;
     }
@@ -277,7 +393,7 @@ sim.clean_register = function(){
     if($('#register_lastname').val() != '' && sim.validaletters($('#register_lastname').val())){
         $('.sim_input_form #lastname_label').text('*');
     }
-    if(sim.validaEmail($('#register_email').val())){
+    if(sim.validaEmail($('#register_email').val()) && $('#register_email').val() != ''){
         $('.sim_input_form #email_label').text('');
     }
     if($('#register_username').val() != ''){
@@ -301,15 +417,61 @@ sim.loading = function(state){
     }
 };
 
-/***************************** TEMPLATES **************************************/
-var tpl_form_login = '<dl><dd><span>email: </span><input class="ui-widget input ui-corner-all" type="text" id="login_username"></dd>';
-tpl_form_login += '<dd><span>Password: </span><input class="ui-widget input ui-corner-all" type="password" id="login_password" style="weight:15px;">';
-tpl_form_login += '<button class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all" onclick="sim.authentication()">';
-tpl_form_login += '<span class="ui-button-text">Go</span></button></dd>';
-tpl_form_login += '<dd><span class="ui-button-text"><a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">Do you want to register?</a></span></dd></dl>';
+sim.key_authentication = function(event){
+	if(event.keyCode == 13){
+		sim.loading(true);
+		sim.authentication();
+	}
+};
 
+/***************************** TEMPLATES **************************************/
+var tpl_form_login = '<table border="0"><tr><td align="center"><span>email:</td><td></span><input class="ui-widget input ui-corner-all" type="text" id="login_username"></td></tr>';
+tpl_form_login += '<tr><td align="center"><span>Password:</td><td></span><input class="ui-widget input ui-corner-all" type="password" onkeypress="sim.key_authentication(event)" id="login_password" style="weight:15px;">';
+tpl_form_login += '<button class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all" onclick="sim.authentication()"><span class="ui-button-text">Go</span></button></td></tr>';
+tpl_form_login += '<tr><td align="right"><span class="ui-button-text"><a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">Do you want to register?</a></span></td></tr></table>';
+//tpl_form_login += '<span class="ui-button-text">Go</span></button></dd>';
+//tpl_form_login += '<dd><span class="ui-button-text"><a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">Do you want to register?</a></span></dd></dl>';
 var tpl_button_login = '<nav class="ui-button-text">';
 tpl_button_login += '<a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">Account access</a>|';
 tpl_button_login += '<a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">Do you want to register?</a>|';
 tpl_button_login += '<a href="javascript:;" onclick="sim.open_form_register()" class="ui-button-text sim_login">FAQ</a>';
 tpl_button_login += '</nav>';
+
+var tpl_categories = function(category_obj){
+    var html = '';
+    if(sim.current_rol == sim.roles.user){
+		html += '<div id="sim_subcategory" onclick="sim.get_subcategory('+category_obj.id_category+');"><span >'+category_obj.name+'</span></dvi>';
+		html += '<div id="toggle_'+category_obj.id_category+'" class="sim_dropdown_toggle" data-toggle="dropdown" style="display:none;"></div>';
+    }
+    return html;
+};
+
+var tpl_subcategory = function(subcategory){
+	var html = '';
+	html += '<ul>';
+	for(var i = 0; i < subcategory.productType.length; i++){
+		var obj_subcategory = subcategory.productType[i];
+		//console.log(obj_subcategory);
+		//alert(subcategory.productType[i].id);
+		html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
+        
+	}
+	html +='</ul>';
+	return html;
+};
+
+var tpl_product = function(){
+	var product_obj = {};
+	product_obj.name = 'Coca-Cola';
+	product_obj.id = 2;
+	product_obj.brand = 'light';
+	product_obj.quantity = '250ml';
+	product_obj.measure_unit = '300ml';
+    var html ='<div class="ui-corner-tr sim_products" id="sim_static_block_product_'+product_obj.id+'">';
+    html += '<div class="ui-widget-header">'+product_obj.name+', '+product_obj.brand+'</div><div>';
+    html +='<div ><img src="./theme/default/imgs/coca-cola.png" alt="Smiley face" class="sim_image_product"/></div>';
+    html += '<hr></hr><div><span class = "sim_static_block_label">'+product_obj.quantity+', '+product_obj.measure_unit+'</span></div>';
+    html += '<div class="sim_product_add_button"><span class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="imi.load_project_description('+product_obj.id+');">Add to Cart</span></div></div>';
+    html += '</div>';
+    return html;
+};

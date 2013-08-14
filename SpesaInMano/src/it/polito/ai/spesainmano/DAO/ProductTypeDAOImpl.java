@@ -1,7 +1,6 @@
 package it.polito.ai.spesainmano.DAO;
 
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
-import it.polito.ai.spesainmano.model.Category;
 import it.polito.ai.spesainmano.model.ProductType;
 
 import java.sql.Connection;

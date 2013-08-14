@@ -1,10 +1,13 @@
 package it.polito.ai.spesainmano.rest.service;
 
-import java.sql.SQLException;
-
 import it.polito.ai.spesainmano.model.User;
+import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
+import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 
 public interface LoginService {
 	
-	User login(User u) throws SQLException;
+	void validateForm(User u) throws  CustomBadRequestException ; 
+	
+	User login(User u) throws CustomNotFoundException, CustomServiceUnavailableException;
 }

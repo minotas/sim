@@ -16,14 +16,37 @@
 <body onload="sim.load_home();">
 	<div class="sim_box_shadow" style="background: white; position: relative">
 		<header>
-			 <div class="sim_header">
+			 <div id="sim_header" class="sim_header">
 				<div class="sim_header_left" >
-					<div id="sim_form_login" >
+					<div id="sim_form_login" ></div>
+					<div class="sim_cart" id="sim_cart" style="display:none;">
+						<div class="sim_number_products"><p><strong>0 PRODUCTS</strong></p></div>
+						<div class="sim_total"><p><strong>TOTAL: 0,00 €</strong></p></div>
+						<div class="sim_validate">
+							<button class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all" onclick="sim.authentication()">
+								<span class="ui-button-text">validate</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 		</header>
 		<section>
+			<div class="sim_categories" id="sim_categories" style="display:none;">
+				<div onclick="">Offers
+					<div id="uno" style="display:none;">uno hola</div>
+				</div>
+			</div>
+			<div id="sim_nav" class="sim_nav" style="display:none;">
+				<span></span>
+			</div>
+			<div class="sim_body" id="sim_body">
+				<div id="sim_body_offers" style="display:none;">Offers</div>
+				<div id="sim_body_menu" class="sim_body_menu" style="display:none;"></div>
+				<div id="sim_body_body" class="sim_body_body" style="display:none;">
+					<div id="sim_body_products" class="sim_body_products" style="display:none;"></div>
+				</div>
+			</div>
 		</section>
 		<footer>
 		</footer>
@@ -40,7 +63,7 @@
             <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_lastname" onKeyPress="return sim.validal(event)" /><span class="obligatory" id="lastname_label">*</span></div>
             
             <div class="sim_label_form"><span class="ui-button-text">email: </span></div>
-            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_email" title="Enter your personal email. Will also be used to send you a login if you forget it."/><span class="obligatory" id="email_label">*</span></div>
+            <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="text" id="register_email" title="Enter your personal email. It will be your username."/><span class="obligatory" id="email_label">*</span></div>
             
             <div class="sim_label_form"><span class="ui-button-text">Password: </span></div>
             <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="password" id="register_password" title="The password have to contain a least 5 characters. In order to come it safe, you can mix number, upper case and lower case" /><span class="obligatory" id="password_label">*</span></div>
