@@ -14,7 +14,7 @@ import it.polito.ai.spesainmano.rest.service.SupermarketService;
 public class SupermarketServiceImpl implements SupermarketService {
 
 	@Override
-	public List<Supermarket> checkIn(float latitude, float longitude) throws  CustomBadRequestException, CustomNotFoundException {
+	public List<Supermarket> checkIn(float latitude, float longitude) throws  CustomBadRequestException, CustomNotFoundException, CustomServiceUnavailableException {
 		
 		if(latitude < -90 || latitude > 90){
 			throw new CustomBadRequestException("Invalid latitude");

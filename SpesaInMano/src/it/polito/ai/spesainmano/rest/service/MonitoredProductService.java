@@ -6,6 +6,6 @@ import java.sql.SQLException;
 
 public interface MonitoredProductService {
 	
-	MonitoredProduct insert(MonitoredProduct mp) throws SQLException;
+	MonitoredProduct insert(MonitoredProduct mp);
 
 }

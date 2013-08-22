@@ -1,0 +1,190 @@
+package it.polito.ai.spesainmano.DAO;
+
+import it.polito.ai.spesainmano.db.ConnectionPoolManager;
+import it.polito.ai.spesainmano.model.Supermarket;
+import it.polito.ai.spesainmano.responses.MarketListDetails;
+import it.polito.ai.spesainmano.responses.SupermarketListPrice;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;  
+import java.util.Comparator;
+
+public class MarketListDAOImp implements MarketListDAO{
+	Connection con;
+
+	@Override
+	public int insert(int idUser) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "insert into market_list(id_user, date) values(?, CURDATE())";
+		try {
+			ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			ps.setInt(1, idUser);
+			ps.executeUpdate();
+			ResultSet rs = ps.getGeneratedKeys();
+			if(rs.next()){
+	           return rs.getInt(1);
+			}
+			else{
+				return 0;
+			}
+			
+		}catch (SQLException e) {
+			 throw e;
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+	}
+
+	
+	public List<SupermarketListPrice> getTotal(List<Supermarket> importantSupermarkets, int marketListId) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		List<SupermarketListPrice> totalsList = new ArrayList<SupermarketListPrice>();
+		PreparedStatement ps = null;
+		String query = " SUM(li.quantity), SUM(li.quantity * a.actual_price)"
+					+ "from list_item li, (SELECT MAX(p.price) as actual_price, p.id_product as idP "
+						+ "FROM price p "
+						+ "where p.id_supermarket = ? " 
+						+ "group by p.id_product) a "
+					+ "where li.id_market_list = ? and li.id_product = a.idP";
+		try {
+			for(int i=1;i<importantSupermarkets.size();i++){
+				ps=null;
+				ps = con.prepareStatement(query);
+				ps.setInt(1, importantSupermarkets.get(i).getId_supermarket());
+				ps.setInt(2, marketListId);
+				ResultSet rs = ps.executeQuery();
+				if(rs.next()){
+		            SupermarketListPrice slp = new SupermarketListPrice();
+		            slp.setId_supermarket(importantSupermarkets.get(i).getId_supermarket());
+		            slp.setProducts_found(rs.getInt(1));
+		            slp.setTotal(rs.getFloat(2));
+		            slp.setLatitude(importantSupermarkets.get(i).getLatitude());
+		            slp.setLongitude(importantSupermarkets.get(i).getLongitude());
+					totalsList.add(slp);
+				}
+			}
+			Collections.sort(totalsList, new Comparator<Object>() {  
+				  
+	            public int compare(Object o1, Object o2) {  
+	            	SupermarketListPrice gtr1 = (SupermarketListPrice) o1;  
+	            	SupermarketListPrice gtr2 = (SupermarketListPrice) o2;  
+	                int num1 = gtr1.getProducts_found();  
+	                int num2 = gtr2.getProducts_found();  
+	  
+	                if (num1 > num2) {  
+	                    return -1;  
+	                } else if (num1 < num2) {  
+	                    return 1;  
+	                } else {
+	                	float tot1 = gtr1.getTotal();  
+		                float tot2 = gtr2.getTotal();  
+	                	if (tot1 > tot2) {  
+		                    return 1;  
+		                } else if (tot1 < tot2) {  
+		                    return -1;  
+		                } else {  
+		                    return 0;  
+		                }   
+	                }  
+	            }  
+	        });
+		}catch (SQLException e) {
+			 throw e;
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+		return totalsList;
+	}
+
+
+	
+
+
+	@Override
+	public int getNumberOfMarketLists(int idUser) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String query = "select count(id_market_list) from market_list list where id_user = ?";
+		try {
+			ps = con.prepareStatement(query);
+			ps.setInt(1, idUser);
+			rs = ps.executeQuery();
+			rs.next();
+	        return rs.getInt(1);
+			
+		}catch (SQLException e) {
+			 throw e;
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+	}
+
+
+	@Override
+	public int getLastMarketListId(int idUser) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String query = "select max(ml.id_market_list) from market_list ml where ml.id_user = ? group by ml.id_user";
+		try {
+			ps = con.prepareStatement(query);
+			ps.setInt(1, idUser);
+			rs = ps.executeQuery();
+			if(rs.next()){
+				return rs.getInt(1);
+			}
+	        return 0;
+			
+		}catch (SQLException e) {
+			 throw e;
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+	}
+
+
+	
+	@Override
+	public List<MarketListDetails> getDetails(int supermaketId, int marketListId) throws SQLException{
+	con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+	List<MarketListDetails> detailsList = new ArrayList<MarketListDetails>();
+	PreparedStatement ps = null;
+	ResultSet rs = null;
+	String query = " SELECT a.name, a.brand, a.quantity, a.measure_unit, li.quantity, li.quantity * a.actual_price "
+					+ "from list_item li, (SELECT MAX(p.price) as actual_price, p.id_product as idP, pro.name, pro.brand, pro.quantity, pro.measure_unit "
+						+ "FROM price p, product pro "
+						+ "where p.id_supermarket = ? and p.id_product = pro.id_product " 
+						+ "group by p.id_product) a "
+					+ "where li.id_market_list = ? and li.id_product = a.idP";
+	try {
+		ps = con.prepareStatement(query);
+		ps.setInt(1, supermaketId);
+		ps.setInt(2, marketListId);
+		rs = ps.executeQuery();
+		while(rs.next()){
+           MarketListDetails mld = new MarketListDetails();
+            mld.setName(rs.getString(1));
+            mld.setBrand(rs.getString(2));
+            mld.setMeasure(rs.getString(3) + rs.getString(4) );
+            mld.setQuantity(rs.getInt(5));
+            mld.setPrice(rs.getFloat(6));
+			detailsList.add(mld);
+		}
+		
+	}catch (SQLException e) {
+		 throw e;
+	} finally{
+		ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+	}
+	return detailsList;
+	}
+
+}

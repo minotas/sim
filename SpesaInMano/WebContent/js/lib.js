@@ -13,6 +13,14 @@ $(function() {
 		
 		$(".sim_dropdown_toggle").toggle(false);
 	});
+	$(document).on("mouseenter", "#sim_categories div .sim_dropdown_toggle a", function(){
+		
+		$(this).css("text-decoration", "underline");
+	});
+	$(document).on("mouseleave", "#sim_categories div .sim_dropdown_toggle a", function(){
+		
+		$(this).css("text-decoration", "none");
+	});
     $('#sim_messages').dialog({  title: "Information",
         autoOpen: false,
         height: 380,
@@ -42,6 +50,8 @@ var sim = {
 sim.current_rol = sim.roles.guest;
 sim.current_section = sim.sections.home;
 sim.current_name_section = '';
+sim.current_cart = {};
+sim.current_cart.listitem = [];
 
 /******************** USER FUNCTIONS *******************************/
 sim.new_user = function () {
@@ -65,7 +75,7 @@ sim.new_user = function () {
             type: 'POST',
             contentType: 'application/json',
             success : function(data) {
-                console.log(data);
+                //console.log(data);
             	sim.loading(false);
                 if(data.id_user){
                     $('#sim_form_register').dialog('close');
@@ -112,16 +122,17 @@ sim.authentication = function(){
         type: 'POST',
        contentType: 'application/json',
         success : function(data) {
-        	console.log(data);
+        	//console.log(data);
             if(data.id_user){
             	$.cookie('name', ''+data.name);
             	$.cookie('lastname', ''+data.lastname);
             	$.cookie('id_user', data.id_user);
                 sim.current_rol = sim.roles.user;
-                sim.change_auth();
-            	var html = 'Welcome Mr./Ms.: '+data.name + ' '+data.lastname+'</i> ';
+                //sim.change_auth();
+            	/*var html = 'Welcome Mr./Ms.: '+data.name + ' '+data.lastname+'</i> ';
                 html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
-                $('#sim_form_login').html(html);
+                $('#sim_form_login').html(html);*/
+				sim.getuser();
                 sim.load_home();
             }
             else{
@@ -146,9 +157,11 @@ sim.change_auth = function(){
     	$('#sim_form_login').html(tpl_form_login);
     	$('#sim_cart').hide();
     	$("#sim_categories").hide();
+		$("#sim_body_offers").hide();
     	$('#sim_body_body').hide();
     	$('#sim_body_menu').hide();
     	$('#sim_nav').hide();
+		$("#sim_categories").html('');
 		break;
     case sim.roles.user:
 		sim.loading(false);
@@ -162,6 +175,7 @@ sim.change_auth = function(){
 };
 
 sim.get_offers = function(){
+	$("#sim_body_offers").html('');
 	$("#sim_body_offers").append(tpl_product);
 	$("#sim_body_offers").append(tpl_product);
 	//$("#sim_body_products").show();
@@ -174,7 +188,7 @@ sim.get_categories = function(){
         url: sim.rest_uri + 'category',
         type: 'GET',
         success : function(data) {
-        	console.log(data.category[1]);
+        	//console.log(data.category[1]);
             if(data.category.length > 0){
             	sim.load_categories(data);
             }
@@ -198,7 +212,7 @@ sim.load_categories = function (data){
 
 sim.get_subcategory = function(id){
 	sim.current_subcategory = id;
-	console.log(id);
+	//console.log(id);
 	$.ajax({
         url: sim.rest_uri + 'category/' + id + '/productType/',
         type: 'GET',
@@ -221,14 +235,14 @@ sim.get_subcategory = function(id){
 sim.load_subcategories = function(data, id){
 	$(".sim_dropdown_toggle").toggle(false);
 	$('#toggle_'+id).html('');
-	$('#toggle_'+id).append(tpl_subcategory(data));
+	$('#toggle_'+id).append(tpl_subcategory(data, 1));
 	$("#toggle_"+id).toggle();
 };
 
 sim.load_subcategories_menu = function(data){
 	$("#sim_body_menu").html('');
 	$('#sim_body_menu').append('<span>Categories</span>');
-	$('#sim_body_menu').append(tpl_subcategory(data));
+	$('#sim_body_menu').append(tpl_subcategory(data, 2));
 };
 
 sim.get_subcategory_products = function(id, name){
@@ -238,14 +252,14 @@ sim.get_subcategory_products = function(id, name){
 	$('#sim_body_body').show();
 	$('#sim_nav').show();
 	$("#sim_body_menu").show();
-	$("#sim_body_products").append(tpl_product);
+	//$("#sim_body_products").append(tpl_product);
 	$("#sim_body_products").show();
 	var data_param = {};
 	data_param.productType = id;
-	/*$.ajax({
+	$.ajax({
         url: sim.rest_uri + 'product',
         type: 'GET',
-        data: JSON.stringify(data_param),
+        data: data_param,
         success : function(data) {
         	console.log(data);
             /*if(data.productType.length > 0){
@@ -254,12 +268,12 @@ sim.get_subcategory_products = function(id, name){
             else{
             	//$('#sim_categories').html(data);
                 sim.print_message(data, sim.message_types.error);
-            }
-        },
+            }*/
+        }/*,
         error:function(data){
         	sim.print_message(data.responseText, sim.message_types.error);
-        }
-    });*/
+        }*/
+    });
 };
 
 sim.logout = function(){
@@ -279,6 +293,13 @@ sim.getuser = function(){
 		var html = 'Welcome Mr./Ms.: <i>'+name + ' '+lastname+'</i> ';
         html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
         $('#sim_form_login').html(html);
+		var number = $.cookie('number_products');
+		if(number != null){
+			$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>'+number+' PRODUCTS</strong></p></a>');
+		}
+		else{
+			$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>0 PRODUCTS</strong></p></a>');
+		}
 	}
 	else{
         sim.current_rol = sim.roles.guest;
@@ -301,6 +322,21 @@ sim.open_form_register = function() {
     $('#sim_form_register').dialog('open');
 };
 
+
+/************************ PRODUCTS ******************************************/
+sim.open_products_detail = function(){
+	$("#sim_products_detail_window ul").html('');
+	var listitem = $.cookie('myCart');
+	var obj_listitem = jQuery.parseJSON(''+listitem+'');
+	console.log(obj_listitem);
+	for(var i = 0; i < obj_listitem.listitem.length; i ++){
+		//var html = '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+obj_listitem.listitem[i]+'</li>';
+		$("#sim_products_detail_window ul").append(tpl_product_detail(obj_listitem.listitem[i]));
+	}
+	//$("#sim_products_detail_window ul").append('<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 1</li>');
+	$('#sim_products_detail_window').show();
+	$("#sim_products_detail_window").dialog();
+}
 
 /************************ OTHERS FUNCTIONS **********************************/
 sim.print_message = function (text, type) {
@@ -424,6 +460,76 @@ sim.key_authentication = function(event){
 	}
 };
 
+sim.plus_quantity = function(id){
+	var plus = $('#sim_input_quantity_'+id).val();
+	plus++;
+	$('#sim_input_quantity_'+id).val(plus);
+	$('#sim_label_quantity_'+id).html(plus);
+};
+
+sim.minus_quantity = function(id){
+	var minus = $('#sim_input_quantity_'+id).val();
+	if(minus > 0){
+		minus--;
+		$('#sim_input_quantity_'+id).val(minus);
+		$('#sim_label_quantity_'+id).html(minus);
+	}	
+};
+
+sim.add_product_to_cart = function(id, name){
+	//$.removeCookie('cart_position');
+	//$.removeCookie('myCart');
+	//alert(name);
+	
+	var object_cart = {};
+	sim.current_cart = $.cookie('myCart');
+	if(sim.current_cart == null){
+		sim.current_cart = {};
+		sim.current_cart.listitem = new Array();
+		sim.current_cart.listitem[0] = {};
+		sim.current_cart.listitem[0].id_product = {};
+		sim.current_cart.listitem[0].id_product.id_product = id;
+		sim.current_cart.listitem[0].id_product.name_product = name;
+		sim.current_cart.listitem[0].quantity = $('#sim_input_quantity_'+id).val();
+		sim.current_cart.number_products = 1;
+		$.removeCookie('number_products');
+		$.cookie('number_products', sim.current_cart.number_products);
+		//console.log(sim.current_cart);
+		var pos = 1;
+		//$('#sim_label_number_products').html(''+sim.current_cart.number_products+' PRODUCTS</strong></p>');
+		$.cookie('cart_position', pos);
+		$.cookie('myCart', JSON.stringify(sim.current_cart));
+		$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>1 PRODUCTS');
+	}
+	else{
+		var pos = $.cookie('cart_position');
+		parseInt(pos);
+		console.log(pos);
+		$.removeCookie('cart_position');
+		$.removeCookie('myCart');
+		
+		object_cart = jQuery.parseJSON(''+sim.current_cart+'');
+		console.log(object_cart);
+		//sim.current_cart.listitem = new Array();
+		object_cart.listitem[pos] = {};
+		object_cart.listitem[pos].id_product = {};
+		object_cart.listitem[pos].id_product.id_product = id;
+		object_cart.listitem[pos].id_product.name_product = name;
+		object_cart.listitem[pos].quantity = $('#sim_input_quantity_'+id).val();
+		parseInt(object_cart.number_products);
+		object_cart.number_products++;
+		$.removeCookie('number_products');
+		$.cookie('number_products', object_cart.number_products);
+		$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>'+object_cart.number_products+' PRODUCTS</strong></p></a>');
+		pos++;
+		//console.log(sim.current_cart.listitem[pos]);
+		//var pos = 1;
+		$.cookie('cart_position', pos);
+		$.cookie('myCart', JSON.stringify(object_cart));
+	}
+	
+};
+
 /***************************** TEMPLATES **************************************/
 var tpl_form_login = '<table border="0"><tr><td align="center"><span>email:</td><td></span><input class="ui-widget input ui-corner-all" type="text" id="login_username"></td></tr>';
 tpl_form_login += '<tr><td align="center"><span>Password:</td><td></span><input class="ui-widget input ui-corner-all" type="password" onkeypress="sim.key_authentication(event)" id="login_password" style="weight:15px;">';
@@ -446,24 +552,96 @@ var tpl_categories = function(category_obj){
     return html;
 };
 
-var tpl_subcategory = function(subcategory){
+var tpl_subcategory = function(subcategory, option){
 	var html = '';
-	html += '<ul>';
-	for(var i = 0; i < subcategory.productType.length; i++){
-		var obj_subcategory = subcategory.productType[i];
-		//console.log(obj_subcategory);
-		//alert(subcategory.productType[i].id);
-		html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
-        
+	if(option == 1){
+		if(subcategory.productType.length <= 7){
+			$('#sim_categories div .sim_dropdown_toggle').css("width", "220px");
+			html += '<ul>';
+			for(var i = 0; i < subcategory.productType.length; i++){
+				var obj_subcategory = subcategory.productType[i];
+				//console.log(obj_subcategory);
+				//alert(subcategory.productType[i].id);
+				html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
+				
+			}
+			html +='</ul>';
+		}
+		else{
+			$('#sim_categories div .sim_dropdown_toggle').css("width", "420px");
+			html += '<table border="0"><th>';
+			html += '<ul>';
+			for(var i = 0; i < 7; i++){
+				var obj_subcategory = subcategory.productType[i];
+				//console.log(obj_subcategory);
+				//alert(subcategory.productType[i].id);
+				html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
+				
+			}
+			html +='</ul>';
+			html += '</th><th>';
+			html += '<ul>';
+			for(var i = 7; i < subcategory.productType.length; i++){
+				var obj_subcategory = subcategory.productType[i];
+				//console.log(obj_subcategory);
+				//alert(subcategory.productType[i].id);
+				html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
+				
+			}
+			html +='</ul>';
+			html += '</th></table>';
+		}
 	}
-	html +='</ul>';
+	else{
+		html += '<ul>';
+		for(var i = 0; i < subcategory.productType.length; i++){
+			var obj_subcategory = subcategory.productType[i];
+			//console.log(obj_subcategory);
+			//alert(subcategory.productType[i].id);
+			html +='<li><a href="#" onclick="sim.get_subcategory_products('+obj_subcategory.id_product_type+', \''+obj_subcategory.name+'\'); return false;">'+obj_subcategory.name+'</a></li>';
+			
+		}
+		html +='</ul>';
+	}
 	return html;
 };
 
 var tpl_product = function(){
 	var product_obj = {};
 	product_obj.name = 'Coca-Cola';
-	product_obj.id = 2;
+	product_obj.id = 1;
+	product_obj.brand = 'light';
+	product_obj.quantity = '250ml';
+	product_obj.measure_unit = '300ml';
+    var html ='<div class="ui-corner-tr sim_products" id="sim_static_block_product_'+product_obj.id+'">';
+    html += '<div class="ui-widget-header">'+product_obj.name+', '+product_obj.brand+'</div><div>';
+    html +='<div ><img src="./theme/default/imgs/coca-cola.png" class="sim_image_product"/></div>';
+    html += '<hr></hr><div><span class = "sim_static_block_label">'+product_obj.quantity+', '+product_obj.measure_unit+'</span></div>';
+    html += '<div class="sim_product_add_button"><span class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id+', \''+product_obj.name+'\');">Add to Cart</span></div></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id+');"><span class="ui-icon ui-icon-circle-minus"></span></span></div>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id+'">0</span>';
+	html += '<input id="sim_input_quantity_'+product_obj.id+'" type="hidden" value="0"/></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
+    html += '</div>';
+    return html;
+};
+
+var tpl_product_detail = function(product_obj){
+
+	var html ='<div><div id="sim_img_product_detail"></div><div id="sim_description_product_detail">'+product_obj.id_product.name_product+'</div>';
+    html += '<div><div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-circle-minus"></span></div>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product.id_product+'">'+product_obj.quantity+'</span>';
+    html += '<input id="sim_input_quantity_'+product_obj.id_product.id_product+'" type="hidden" value="'+product_obj.quantity+'"/></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-circle-plus"></span></div> </div></div>';
+    
+	return html;
+
+};
+
+var tpl_supermarket_validate = function(){
+	var product_obj = {};
+	product_obj.name = 'Coca-Cola';
+	product_obj.id = 1;
 	product_obj.brand = 'light';
 	product_obj.quantity = '250ml';
 	product_obj.measure_unit = '300ml';
@@ -471,7 +649,10 @@ var tpl_product = function(){
     html += '<div class="ui-widget-header">'+product_obj.name+', '+product_obj.brand+'</div><div>';
     html +='<div ><img src="./theme/default/imgs/coca-cola.png" alt="Smiley face" class="sim_image_product"/></div>';
     html += '<hr></hr><div><span class = "sim_static_block_label">'+product_obj.quantity+', '+product_obj.measure_unit+'</span></div>';
-    html += '<div class="sim_product_add_button"><span class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="imi.load_project_description('+product_obj.id+');">Add to Cart</span></div></div>';
+    html += '<div class="sim_product_add_button"><span class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id+');">Add to Cart</span></div></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id+');"><span class="ui-icon ui-icon-circle-minus"></span></div>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id+'">0</span><input id="sim_input_quantity_'+product_obj.id+'" type="hidden" value="0"/></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id+');"><span class="ui-icon ui-icon-circle-plus"></span></div>';
     html += '</div>';
     return html;
 };

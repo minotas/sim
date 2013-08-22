@@ -19,7 +19,7 @@ public class MonitoredProductDAOImp implements MonitoredProductDAO{
 			ps = con.prepareStatement(query);
 			ps.setInt(1, mp.getId_user().getId_user());
 			ps.setInt(2, mp.getId_product().getId_product());
-			ps.getGeneratedKeys();
+			ps.executeUpdate();
 			
 		}catch (SQLException e) {
 			 throw e;

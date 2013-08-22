@@ -11,8 +11,18 @@ public interface PriceDAO {
 	
 	public float[] checkPrice (Price p) throws SQLException;
 
-	public List<Price> getProductPriceInNearSupermarkets(Price p) throws SQLException;
+	public List<Price> getProductPriceInNearSupermarkets(int id_user, int productId, float latitude, float longitude, int supermarketId) throws SQLException;
 
 	public float getAverageLastSixMonths(int productId, int supermarketId) throws SQLException;
+
+	public float[] getPriceQualityInfo( int productId, int supermarketId)throws SQLException;
+
+	public List<Price> getOffersMonitored(int idUser, float latitude, float longitude) throws SQLException;
+
+	public List<Price> getGeneralOffers(float longitude, float latitude) throws SQLException;
+
+	public List<Price> getOffersProductsInOneList(int idUser, float latitude, float longitude) throws SQLException;
+	
+	public List<Price> getOffersProductsInMultipleLists(int idUser, float latitude, float longitude) throws SQLException;
 	
 }

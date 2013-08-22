@@ -1,16 +1,25 @@
 package it.polito.ai.spesainmano.rest.service;
 
+import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.Product;
+import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
+import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public interface ProductService {
 
-	Product create(Product p) throws SQLException;
+	void validate(Product p) throws CustomBadRequestException;
 	
-	Product getProductByBarcode (String barcode) throws SQLException;
+	Product create(Product p) throws CustomServiceUnavailableException, CustomBadRequestException;
+	
+	Product getProductByBarcode (String barcode) throws CustomBadRequestException, CustomNotFoundException, CustomServiceUnavailableException;
 
-	List<Product> getProductByProductType(int productTypeId) throws SQLException;
+	List<Product> getProductByProductType(int productTypeId) throws CustomNotFoundException, CustomServiceUnavailableException;
+
+	List<Price> getSimilarProducst(int productId, int supermarketId);
+
 	
 }

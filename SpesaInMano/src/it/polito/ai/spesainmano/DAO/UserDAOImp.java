@@ -90,7 +90,7 @@ public class UserDAOImp implements UserDAO{
 		
 			if(rs.next()){
 			
-				return rs.getInt(0);
+				return rs.getInt(1);
 			
 			}
 		

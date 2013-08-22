@@ -11,6 +11,7 @@
 	<script type="text/javascript" src="js/jquery-ui.js"></script>
 	<script type="text/javascript" src="js/md5.js"></script>
 	<script type="text/javascript" src="js/lib.js"></script>
+	<script type="text/javascript" src="jquery.carouFredSel.js"></script>
 	
 </head>
 <body onload="sim.load_home();">
@@ -20,8 +21,8 @@
 				<div class="sim_header_left" >
 					<div id="sim_form_login" ></div>
 					<div class="sim_cart" id="sim_cart" style="display:none;">
-						<div class="sim_number_products"><p><strong>0 PRODUCTS</strong></p></div>
-						<div class="sim_total"><p><strong>TOTAL: 0,00 €</strong></p></div>
+						<div class="sim_number_products"><span id="sim_label_number_products"><p><strong>0 PRODUCTS</strong></p></span><input type="hidden" id="sim_input_number_products" value="0"/></div>
+						<!--<div class="sim_total"><p><strong>TOTAL: 0,00 €</strong></p></div>-->
 						<div class="sim_validate">
 							<button class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all" onclick="sim.authentication()">
 								<span class="ui-button-text">validate</span>
@@ -31,7 +32,7 @@
 				</div>
 			</div>
 		</header>
-		<section>
+		<section id="sim_section">
 			<div class="sim_categories" id="sim_categories" style="display:none;">
 				<div onclick="">Offers
 					<div id="uno" style="display:none;">uno hola</div>
@@ -71,6 +72,11 @@
             <div class="sim_label_form"><span class="ui-button-text">Repeat password: </span></div>
             <div class="sim_input_form"><input class="ui-widget input ui-corner-all" type="password" id="register_repeat_password" title="Please enter the same password in both fields"/><span class="obligatory" id="rpassword_label">*</span></div>
         </div>
+		
+		<div id="sim_products_detail_window" style="display:none;">
+			<ul id="sim_sortable"></ul>
+		</div>
+		
 	</div>
 </body>
 </html>

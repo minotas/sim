@@ -5,7 +5,8 @@ public class ListItem {
 	
 	Product id_product;
 	MarketList id_marketlist;
-	
+	int quantity;
+
 	
 	public Product getId_product() {
 		return id_product;
@@ -21,6 +22,14 @@ public class ListItem {
 	
 	public void setId_marketlist(MarketList id_marketlist) {
 		this.id_marketlist = id_marketlist;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 
 }

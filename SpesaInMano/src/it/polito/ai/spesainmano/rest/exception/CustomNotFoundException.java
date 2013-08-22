@@ -4,8 +4,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.sun.jersey.api.Responses;
-
 public class CustomNotFoundException extends WebApplicationException {
 
 		  /**
