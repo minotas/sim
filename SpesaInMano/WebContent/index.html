@@ -24,7 +24,7 @@
 						<div class="sim_number_products"><span id="sim_label_number_products"><p><strong>0 PRODUCTS</strong></p></span><input type="hidden" id="sim_input_number_products" value="0"/></div>
 						<!--<div class="sim_total"><p><strong>TOTAL: 0,00 €</strong></p></div>-->
 						<div class="sim_validate">
-							<button class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all" onclick="sim.authentication()">
+							<button id="sim_validate_button" class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all">
 								<span class="ui-button-text">validate</span>
 							</button>
 						</div>
@@ -42,18 +42,26 @@
 				<span></span>
 			</div>
 			<div class="sim_body" id="sim_body">
-				<div id="sim_body_offers" style="display:none;">Offers</div>
+				<div id="sim_body_offers_external" style="display:none;">
+					<div id="sim_body_offers" ></div>
+				</div>
 				<div id="sim_body_menu" class="sim_body_menu" style="display:none;"></div>
 				<div id="sim_body_body" class="sim_body_body" style="display:none;">
+					<div class="sim_pagination" style="display:none;"></div>
 					<div id="sim_body_products" class="sim_body_products" style="display:none;"></div>
+					<div class="sim_pagination" style="display:none;"></div>
 				</div>
 			</div>
 		</section>
 		<footer>
 		</footer>
 		
-		<div id="sim_messages" style="display:none"></div>
-		<div id="sim_loading" style="display: none"></div>
+		<div id="sim_messages" style="display:none;"></div>
+		<div id="sim_loading" style="display: none;"></div>
+		<div id="sim_send_cart" style="display:none;">
+			<p>Please confirm shipment of your cart. After it, you will be not able to make any changes into this cart.</p>
+			<p>confirm to shipment it or cancel</p>
+		</div>
 		
 		<!-- ************************** FORMS ***********************************************************-->
         <div id="sim_form_register" style="display:none;">
@@ -77,6 +85,9 @@
 			<ul id="sim_sortable"></ul>
 		</div>
 		
+		
+		
+		<br style="clear: both;"/>
 	</div>
 </body>
 </html>

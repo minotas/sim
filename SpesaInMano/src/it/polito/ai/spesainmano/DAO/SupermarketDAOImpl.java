@@ -57,7 +57,7 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 	public List<Supermarket> getMostVisitedSupermarkets(int userId) throws SQLException{
 	con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 	PreparedStatement ps = null;
-	String query = "select s.id_supermarket, s.longitude, s.latitude from supermarket s, price p where p.date > date(now()) - 180 and  p.id_supermarket = s.id_supermarket and p.id_user = ? group by id_supermarket order by count(p.id_product) desc limit 3";
+	String query = "select s.id_supermarket, s.longitude, s.latitude, s.name from supermarket s, price p where p.date > date(now()) - 180 and  p.id_supermarket = s.id_supermarket and p.id_user = ? group by id_supermarket order by count(p.id_product) desc limit 3";
 	List<Supermarket> supermarkets = new ArrayList<Supermarket>();
 
 	try {
@@ -70,8 +70,9 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 	
 			Supermarket s = new Supermarket();
 			s.setId_supermarket(rs.getInt(1));
-			s.setLatitude(rs.getFloat(2));
+			s.setLongitude(rs.getFloat(2));
 			s.setLatitude(rs.getFloat(3));
+			s.setName(rs.getString(4));
 			supermarkets.add(s);
 	
 		}

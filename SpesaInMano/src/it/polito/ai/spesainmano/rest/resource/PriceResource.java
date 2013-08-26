@@ -58,11 +58,9 @@ public class PriceResource {
 		if (!pathParams.containsKey("id_user")) {
 			throw new CustomUnathorizedException("The user isn't logged in");
 		}
-
-	
 		
-			priceService = new PriceServiceImpl();
-			return priceService.getNearSupermarketsPrices(Integer.parseInt(pathParams.get("id_user").getValue()), productId, latitude, longitude, supermarketId);
+		priceService = new PriceServiceImpl();
+		return priceService.getNearSupermarketsPrices(Integer.parseInt(pathParams.get("id_user").getValue()), productId, latitude, longitude, supermarketId);
 
 
 	}

@@ -37,8 +37,8 @@ public class MonitoredSupermarketDAOImp implements MonitoredSupermarketDAO{
 	public List<Supermarket> getMonitoredSupermarkets(int idUser) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "SELECT s.id_supermarket, s.longitude, s.latitude"
-				+ "FROM supermarket s, monitored_supermarket ms"
+		String query = "SELECT s.id_supermarket, s.longitude, s.latitude "
+				+ "FROM supermarket s, monitored_supermarket ms "
 				+ "WHERE s.id_supermarket = ms.id_supermarket and ms.id_user = ? ";
 		List<Supermarket> supermarkets = new ArrayList<Supermarket>();
 		try {

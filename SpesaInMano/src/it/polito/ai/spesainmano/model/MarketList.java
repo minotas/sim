@@ -2,6 +2,8 @@ package it.polito.ai.spesainmano.model;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlRootElement;
+@XmlRootElement
 public class MarketList {
 	
 	int id_marketlist;

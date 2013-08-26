@@ -13,6 +13,7 @@ import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.responses.InsertPriceResponse;
 import it.polito.ai.spesainmano.responses.MarketListDetails;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.PriceService;
 
@@ -73,13 +74,13 @@ public class PriceServiceImpl implements PriceService{
 			
 			if(p.getType().equals("n")){
 				switch(credibility){
-					case 1:if(((price > avg + std) || (price < avg - std)) && ((price > 1.05 * avg)  || (price < avg * 0.95))){
+					case 1:if(((price > avg + std) || (price < avg - std)) && ((price > 1.15 * avg)  || (price < avg * 0.85))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 							}	
-					case 2: if(((price > avg + std) || (price < avg - std)) && ((price > 1.10 * avg)  || (price < avg * 0.90))){
+					case 2: if(((price > avg + std) || (price < avg - std)) && ((price > 1.20 * avg)  || (price < avg * 0.80))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 							}	
-					case 3: if(((price > avg + std) || (price < avg - std)) && ((price > 1.15 * avg)  || (price < avg * 0.85))){
+					case 3: if(((price > avg + std) || (price < avg - std)) && ((price > 1.25 * avg)  || (price < avg * 0.75))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 						   	}	
 					default: return;
@@ -87,13 +88,13 @@ public class PriceServiceImpl implements PriceService{
 			}
 			else{
 				switch(credibility){
-					case 1:if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.05 * avg)  || (price < avg * 0.75))){
+					case 1:if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.15 * avg)  || (price < avg * 0.75))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 							}	
-					case 2: if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.10 * avg)  || (price < avg * 0.65))){
+					case 2: if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.20 * avg)  || (price < avg * 0.65))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 							}	
-					case 3: if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.15 * avg)  || (price < avg * 0.50))){
+					case 3: if(((price > avg + std) || (price < avg - 2 * std)) && ((price > 1.25 * avg)  || (price < avg * 0.50))){
 								throw new CustomBadRequestException("The price cannot be inserted because it seems that is wrong accordingly with our reliability politics");
 						   	}	
 					default: return;
@@ -115,35 +116,35 @@ public class PriceServiceImpl implements PriceService{
 		PriceDAO priceDao = new PriceDAOImp();
 		float[] priceQuality;
 		try {
-			if(priceDao.insert(p) > 0){
-				InsertPriceResponse r = new InsertPriceResponse();
-				UserDAO userDao = new UserDAOImp();
-				userDao.incrementPoints(p.getId_user().getId_user());
-				r.setUser_score(userDao.getPoints(p.getId_user().getId_user()));
-				
-				priceQuality = priceDao.getPriceQualityInfo(p.getId_product().getId_product(), p.getId_supermarket().getId_supermarket());
-				if(priceQuality[3] == 1){
+			InsertPriceResponse r = new InsertPriceResponse();
+			priceQuality = priceDao.getPriceQualityInfo(p.getId_product().getId_product(), p.getId_supermarket().getId_supermarket());
+			if(priceQuality[3] == 0){
+				r.setPrice_qualifier(5);
+			}
+			else{
+				if(p.getPrice() < priceQuality[1]){
 					r.setPrice_qualifier(5);
-				}
-				else{
-					if(p.getPrice() < priceQuality[1]){
-						r.setPrice_qualifier(5);
+				}else{
+					if(p.getPrice() < priceQuality[0]){
+						r.setPrice_qualifier(4);
 					}else{
-						if(p.getPrice() < priceQuality[0]){
-							r.setPrice_qualifier(4);
+						if(p.getPrice() == priceQuality[0]){
+							r.setPrice_qualifier(3);
 						}else{
-							if(p.getPrice() == priceQuality[0]){
-								r.setPrice_qualifier(3);
+							if(p.getPrice() < priceQuality[2]){
+								r.setPrice_qualifier(2);
 							}else{
-								if(p.getPrice() < priceQuality[2]){
-									r.setPrice_qualifier(2);
-								}else{
-									r.setPrice_qualifier(1);
-								}
+								r.setPrice_qualifier(1);
 							}
 						}
 					}
 				}
+			}
+		
+			if(priceDao.insert(p) > 0){
+				UserDAO userDao = new UserDAOImp();
+				userDao.incrementPoints(p.getId_user().getId_user());
+				r.setUser_score(userDao.getPoints(p.getId_user().getId_user()));
 				r.setId_product(p.getId_product().getId_product());
 				return r;
 			}
@@ -171,7 +172,11 @@ public class PriceServiceImpl implements PriceService{
 	public List<Price> getNearSupermarketsPrices(int userId, int productId, float latitude, float longitude, int supermarketId) throws CustomServiceUnavailableException {
 		PriceDAO priceDao =  new PriceDAOImp();
 		try {
-			return priceDao.getProductPriceInNearSupermarkets(userId, productId, latitude, longitude, supermarketId);
+			List<Price> prices =  priceDao.getProductPriceInNearSupermarkets(userId, productId, latitude, longitude, supermarketId);
+			if(prices.size() == 0){
+				throw new CustomNotFoundException("The product is not present in any near supermarket");
+			}
+			return prices;
 		} catch (SQLException e) {
 			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
 		}

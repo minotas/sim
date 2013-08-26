@@ -47,14 +47,16 @@ public class MarketListDAOImp implements MarketListDAO{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		List<SupermarketListPrice> totalsList = new ArrayList<SupermarketListPrice>();
 		PreparedStatement ps = null;
-		String query = " SUM(li.quantity), SUM(li.quantity * a.actual_price)"
-					+ "from list_item li, (SELECT MAX(p.price) as actual_price, p.id_product as idP "
-						+ "FROM price p "
-						+ "where p.id_supermarket = ? " 
-						+ "group by p.id_product) a "
-					+ "where li.id_market_list = ? and li.id_product = a.idP";
+		String query = " SELECT SUM(li.quantity), SUM(li.quantity * a.actual_price) "
+						+ "FROM list_item li, (SELECT p.price as actual_price, p.id_product as id_product "
+							+ "FROM price p, (SELECT max(p.id_price) as id_price "
+								+ "FROM price p " 
+								+ "WHERE p.id_supermarket = ? " 
+								+ "GROUP BY id_product) currentIdPrice "
+							+ "WHERE p.id_price = currentIdPrice.id_price) a " 
+						+ "where li.id_market_list = ? and li.id_product = a.id_product";
 		try {
-			for(int i=1;i<importantSupermarkets.size();i++){
+			for(int i=0; i<importantSupermarkets.size(); i++){
 				ps=null;
 				ps = con.prepareStatement(query);
 				ps.setInt(1, importantSupermarkets.get(i).getId_supermarket());
@@ -67,7 +69,8 @@ public class MarketListDAOImp implements MarketListDAO{
 		            slp.setTotal(rs.getFloat(2));
 		            slp.setLatitude(importantSupermarkets.get(i).getLatitude());
 		            slp.setLongitude(importantSupermarkets.get(i).getLongitude());
-					totalsList.add(slp);
+					slp.setName(importantSupermarkets.get(i).getName());
+		            totalsList.add(slp);
 				}
 			}
 			Collections.sort(totalsList, new Comparator<Object>() {  
@@ -102,9 +105,6 @@ public class MarketListDAOImp implements MarketListDAO{
 		}
 		return totalsList;
 	}
-
-
-	
 
 
 	@Override
@@ -158,12 +158,14 @@ public class MarketListDAOImp implements MarketListDAO{
 	List<MarketListDetails> detailsList = new ArrayList<MarketListDetails>();
 	PreparedStatement ps = null;
 	ResultSet rs = null;
-	String query = " SELECT a.name, a.brand, a.quantity, a.measure_unit, li.quantity, li.quantity * a.actual_price "
-					+ "from list_item li, (SELECT MAX(p.price) as actual_price, p.id_product as idP, pro.name, pro.brand, pro.quantity, pro.measure_unit "
-						+ "FROM price p, product pro "
-						+ "where p.id_supermarket = ? and p.id_product = pro.id_product " 
-						+ "group by p.id_product) a "
-					+ "where li.id_market_list = ? and li.id_product = a.idP";
+	String query = "  SELECT p.name, p.brand, p.measure_unit, p.quantity, li.quantity, li.quantity * a.actual_price "
+						+ "FROM list_item li, product p, (SELECT p.price as actual_price, p.id_product as id_product "
+							+ "FROM price p, (SELECT max(p.id_price) as id_price "
+								+ "FROM price p " 
+								+ "WHERE p.id_supermarket = ? " 
+								+ "GROUP BY id_product) currentIdPrice "
+							+ "WHERE p.id_price = currentIdPrice.id_price) a " 
+						+ "where li.id_market_list = ? and li.id_product = a.id_product and li.id_product = p.id_product" ;
 	try {
 		ps = con.prepareStatement(query);
 		ps.setInt(1, supermaketId);

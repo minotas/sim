@@ -40,12 +40,10 @@ public class PriceDAOImp implements PriceDAO {
 
 	@Override
 	public float[] checkPrice(Price p) throws SQLException {
-		con = ConnectionPoolManager.getPoolManagerInstance()
-				.getConnectionFromPool();
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		
-		//Discutir si es buena idea comparar el precio con el de ese supermercado o con los precios de todos
-		String query = "select avg (price), std(price) from (select * from price where id_product=? order by date desc limit 50)AS last_fifty_prices";
+		String query = "select avg (price), std(price) from (select * from price where id_product=? and type != 'o' order by date desc limit 50)AS last_fifty_prices";
 		try {
 			ps = con.prepareStatement(query);
 			ps.setInt(1, p.getId_product().getId_product());
@@ -70,16 +68,22 @@ public class PriceDAOImp implements PriceDAO {
 		}
 	}
 
+	
+	/*Selects the price of a product in the supermarkets located in an area of 1km of radio
+	 *Selects the price of a product in all the monitored supermakets
+	 */
 	@Override
 	public List<Price> getProductPriceInNearSupermarkets(int userId, int productId, float latitude, float longitude, int supermarketId) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "Select max(p.id_price), p.price, s.name, s.longitude, s.latitude, s.id_supermarket, p.type "+
-						"from price p, supermarket s " +
-						"where p.id_product = ? and p.id_supermarket = s.id_supermarket " +
-						"and SQRT(POWER((s.longitude-?),2)+POWER((s.latitude-?),2))*111120<=1000 " +
-						"and s.id_supermarket != ? "+
-						"group by s.id_supermarket";
+		String query = "select p.id_price, p.price, s.name, s.longitude, s.latitude, s.id_supermarket, p.type "
+					+ "from price p, supermarket s, (Select max(p.id_price) as id_price, s.id_supermarket "
+						+ "from price p, supermarket s  "
+						+ "where p.id_product = ? and p.id_supermarket = s.id_supermarket  "
+						+ "and SQRT(POWER((s.longitude-?),2)+POWER((s.latitude-?),2))*111120<=1000 "
+						+ "and s.id_supermarket != ? "
+						+ "group by s.id_supermarket) maxPrice "
+					+ "where s.id_supermarket = maxPrice.id_supermarket and p.id_price = maxPrice.id_price ";
 		
 		List<Price> prices = new ArrayList<Price>();
 		
@@ -108,11 +112,13 @@ public class PriceDAOImp implements PriceDAO {
 			SupermarketDAO supermarketDao = new SupermarketDAOImpl();
 			List<Supermarket> supermarkets = supermarketDao.getMostVisitedSupermarkets(userId);
 			
-			String query2 = " Select max(p.id_price), p.price, s.name, s.longitude, s.latitude,  s.id_supermarket, p.type "
-					+ "from price p, supermarket s "
-					+ "where p.id_product = ? and p.id_supermarket = s.id_supermarket "
-					+ "and s.id_supermarket = ? "
-					+ "group by s.id_supermarket";
+			String query2 = "Select  max(p.id_price), p.price, s.name, s.longitude, s.latitude,  s.id_supermarket, p.type "
+						+ "from price p, supermarket s, (Select max(p.id_price) as id_price, s.id_supermarket "
+							+ "from price p, supermarket s  "
+							+ "	where p.id_product = ? and p.id_supermarket = s.id_supermarket  "
+							+ "and s.id_supermarket = ?  "
+							+ ") maxPrice "
+						+ "where p.id_price = maxPrice.id_price and p.id_supermarket = s.id_supermarket";
 			
 			for(int i = 0; i < supermarkets.size(); i++){
 				if(supermarkets.get(i).getId_supermarket() != supermarketId){
@@ -199,49 +205,59 @@ public class PriceDAOImp implements PriceDAO {
 		}
 	}
 
-	
+	/*
+	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *Select the products that are in offer in the monitored supermarkets
+	 *Select the products that are in offer in the 3 most visited supermarkets
+	 */
 	@Override
 	public List<Price> getOffersMonitored(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type " 
-							+ " from price p, supermarket s, product pro " 
-							+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product "
-							+ "and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
-							+ "group by p.id_product, p.id_supermarket "
-					+ ") a, monitored_product mp "
-					+ " where a.type = 'o' and mp.id_product = a.id_product and mp.id_user = ?" 
-				+ "UNION" 
-				+ "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a, monitored_supermarket ms "
-					+ "where a.type = 'o' and ms.id_supermarket = a.id_supermarket and ms.id_user = ? "
+		String query = "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+					+ "from monitored_product mp, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+						+ "from price p, ( "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p "
+							+ "group by p.id_product, p.id_supermarket " 
+							+ ") currentPrice "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+					+ "where mp.id_product = oP.id_product and mp.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
+				+ "UNION " 
+				+ "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name " 
+				+ "from monitored_supermarket ms, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+					+ "from price p, ( "
+						+ "select max(p.id_price) as id_price " 
+						+ "from price p "
+						+ "group by p.id_product, p.id_supermarket " 
+						 + ") currentPrice "
+					+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+				+ "where ms.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and oP.id_supermarket = ms.id_supermarket"
 				+ "UNION "
-				+"select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a"
-					+ "where a.type = 'o' and a.id_supermarket in(select * from (select p.id_supermarket "
-						+"from price p " 
-						+ "where p.id_user = ? " 
-						+ "group by id_supermarket "  
+				+"Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+				+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price  "
+					+ "from price p, (  "
+						+ "select max(p.id_price) as id_price " 
+						+ "from price p  "
+						+ "group by p.id_product, p.id_supermarket " 
+						+ ") currentPrice  "
+					+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+				+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and s.id_supermarket in( select * " 
+					+ "from (select p.id_supermarket  "
+						+ "from price p   "
+						+ "where p.id_user = ? "  
+						+ "group by id_supermarket "   
 						+ "order by count(p.id_supermarket) "
-						+ "limit 3) a "
-						+ ")) ";
+						+ "limit 3) "
+					+ "a)";
 		
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
 			ps = con.prepareStatement(query);
-			ps.setFloat(1, longitude);
-			ps.setFloat(2, latitude);
-			ps.setInt(3, idUser);
+			ps.setInt(1, idUser);
+			ps.setFloat(2, longitude);
+			ps.setFloat(3, latitude);
 			ps.setInt(4, idUser);
 			ps.setInt(5, idUser);
 			ResultSet rs = ps.executeQuery();
@@ -269,19 +285,22 @@ public class PriceDAOImp implements PriceDAO {
 		}
 	}
 
-	
+	/*
+	 * Selects all the offer prices in the supermarkets that are in area of 2km radio 
+	 */
 	@Override
 	public List<Price> getGeneralOffers(float longitude, float latitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type " 
-							+ "from price p, supermarket s, product pro " 
-							+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product "
-							+ "and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=2000 " 
-							+ "group by p.id_product, p.id_supermarket "
-						+ ") a " 
-					+ "where a.type = 'o'";
+		String query = "select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+						+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price "
+							+ "from price p, ( "
+								+ "select max(p.id_price) as id_price "
+								+ "from price p "
+								+ "group by p.id_product, p.id_supermarket "
+								+ ") currentPrice "
+							+ "where p.id_price = currentPrice.id_price and p.type = 'o') oP "
+						+ "where op.id_product = pro.id_product and op.id_supermarket = s.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=2000 ";
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
@@ -313,69 +332,75 @@ public class PriceDAOImp implements PriceDAO {
 		}
 	}
 
+	/*
+	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *Selects the products that are in offer in the monitored supermarkets
+	 *Selects the products that are in offer in the 3 most visited supermarkets
+	 *Selects the product in the market list that are in offer in the supermarkets located in an area of 5km of radio
+	 */
 	@Override
 	public List<Price> getOffersProductsInOneList(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name "
-				+ " from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ " from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product "
-					+ "and ((SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000  or s.id_supermarket in( "
-						+" select * from (select p.id_supermarket " 
-						+ " from price p " 
-						+ "where p.id_user = ? " 
-						+ "group by id_supermarket "  
-						+ "order by count(p.id_supermarket) "
-						+ "limit 3) a "
-						+ " )) "  
-						+ "group by p.id_product, p.id_supermarket "
-						+ " ) a, list_item li, market_list ml "
-						+ " where a.type = 'o' and li.id_product = a.id_product and ml.id_market_list = li.id_market_list and ml.id_user = ?"
-						+"UNION "
-				+ "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type " 
-							+ " from price p, supermarket s, product pro " 
-							+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product "
-							+ "and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
-							+ "group by p.id_product, p.id_supermarket "
-					+ ") a, monitored_product mp "
-					+ " where a.type = 'o' and mp.id_product = a.id_product and mp.id_user = ?" 
-				+ "UNION" 
-				+ "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a, monitored_supermarket ms "
-					+ "where a.type = 'o' and ms.id_supermarket = a.id_supermarket and ms.id_user = ? "
+		String query = "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+					+ "from monitored_product mp, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+						+ "from price p, ( "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p "
+							+ "group by p.id_product, p.id_supermarket " 
+							+ ") currentPrice "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+					+ "where mp.id_product = oP.id_product and mp.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
+				+ "UNION " 
+				+ "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name " 
+				+ "from monitored_supermarket ms, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+					+ "from price p, ( "
+						+ "select max(p.id_price) as id_price " 
+						+ "from price p "
+						+ "group by p.id_product, p.id_supermarket " 
+						 + ") currentPrice "
+					+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+				+ "where ms.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and oP.id_supermarket = ms.id_supermarket "
 				+ "UNION "
-				+"select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a"
-					+ "where a.type = 'o' and a.id_supermarket in(select * from (select p.id_supermarket "
-						+"from price p " 
-						+ "where p.id_user = ? " 
-						+ "group by id_supermarket "  
+				+"Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+				+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price  "
+					+ "from price p, (  "
+						+ "select max(p.id_price) as id_price " 
+						+ "from price p  "
+						+ "group by p.id_product, p.id_supermarket " 
+						+ ") currentPrice  "
+					+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+				+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and s.id_supermarket in( select * " 
+					+ "from (select p.id_supermarket  "
+						+ "from price p   "
+						+ "where p.id_user = ? "  
+						+ "group by id_supermarket "   
 						+ "order by count(p.id_supermarket) "
-						+ "limit 3) a "
-						+ ")) ";
+						+ "limit 3) "
+					+ "a) "
+					+ "UNION "
+					+ "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+					+ "from market_list ml, list_item li, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+						+ "from price p, ( "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p "
+							+ "group by p.id_product, p.id_supermarket "
+						+ "	) currentPrice  "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'n' ) oP "
+					+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket "
+					+ "and ml.id_user = 1 and ml.id_market_list = li.id_market_list and li.id_product = op.id_product  and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 ";
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
 			ps = con.prepareStatement(query);
-			ps.setFloat(1, longitude);
-			ps.setFloat(2, latitude);
-			ps.setInt(3, idUser);
+			ps.setInt(1, idUser);
+			ps.setFloat(2, longitude);
+			ps.setFloat(3, latitude);
 			ps.setInt(4, idUser);
-			ps.setFloat(5, longitude);
-			ps.setFloat(6, latitude);
-			ps.setInt(7, idUser);
-			ps.setInt(8, idUser);
-			ps.setInt(9, idUser);
+			ps.setInt(5, idUser);
+			ps.setInt(6, idUser);
+			ps.setFloat(7, longitude);
+			ps.setFloat(8, latitude);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()){
 				Price price = new Price();
@@ -401,76 +426,86 @@ public class PriceDAOImp implements PriceDAO {
 		}
 	}
 	
+	
+	/*
+	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *Selects the products that are in offer in the monitored supermarkets
+	 *Selects the products that are in offer in the 3 most visited supermarkets
+	 *Selects the 5 most favorite products in the market lists that are in offer in the supermarkets located in an area of 5km of radio
+	 */
 	@Override
 	public List<Price> getOffersProductsInMultipleLists(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name "
-						+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-							+ "from price p, supermarket s, product pro " 
-							+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-							+ "and ((SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000  or s.id_supermarket in( " 
-								+ "select * from (select p.id_supermarket " 
-								+ "from price p " 
-								+ "where p.id_user = ? "
-								+ "group by id_supermarket " 
-								+ "order by count(p.id_supermarket) " 
-								+ "limit 3) a " 
-								+ ")) "   
-							+ "group by p.id_product, p.id_supermarket "
-							+ ") a "
-						+ "where a.type = 'o' and a.id_product in ( "
-							+ "select * from (select li.id_product " 
-							+ "from list_item li, market_list ml "
-							+ "where ml.date >=  date(now()) - 180 and li.id_market_list = ml.id_market_list and ml.id_user = ? "
-							+ "group by li.id_product "
-							+ "order by count(*) "
-							+ "limit 10) b "
-							+ ") "
-						+"UNION "
-				+ "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type " 
-							+ " from price p, supermarket s, product pro " 
-							+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product "
-							+ "and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
-							+ "group by p.id_product, p.id_supermarket "
-					+ ") a, monitored_product mp "
-					+ " where a.type = 'o' and mp.id_product = a.id_product and mp.id_user = ?" 
-				+ "UNION" 
-				+ "select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a, monitored_supermarket ms "
-					+ "where a.type = 'o' and ms.id_supermarket = a.id_supermarket and ms.id_user = ? "
-				+ "UNION "
-				+"select a.id_product, a.price, a.pname, a.brand, a.quantity, a.measure_unit, a.name " 
-					+ "from(select pro.id_product, p.price, pro.name as pname, pro.brand, pro.quantity, pro.measure_unit, s.name, max(id_price), p.type, s.id_supermarket "
-					+ "from price p, supermarket s, product pro " 
-					+ "where p.id_supermarket = s.id_supermarket and p.id_product = pro.id_product " 
-					+ "group by p.id_product, p.id_supermarket "
-					+ " ) a"
-					+ "where a.type = 'o' and a.id_supermarket in(select * from (select p.id_supermarket "
-						+"from price p " 
-						+ "where p.id_user = ? " 
-						+ "group by id_supermarket "  
-						+ "order by count(p.id_supermarket) "
-						+ "limit 3) a "
-						+ ")) ";
+		String query = "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+					+ "from monitored_product mp, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+						+ "from price p, ( "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p "
+							+ "group by p.id_product, p.id_supermarket " 
+							+ ") currentPrice "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+					+ "where mp.id_product = oP.id_product and mp.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 "
+					+ "UNION " 
+					+ "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name " 
+					+ "from monitored_supermarket ms, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
+						+ "from price p, ( "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p "
+							+ "group by p.id_product, p.id_supermarket " 
+							 + ") currentPrice "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+					+ "where ms.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and oP.id_supermarket = ms.id_supermarket "
+					+ "UNION "
+					+"Select oP.id_product, oP.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+					+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price  "
+						+ "from price p, (  "
+							+ "select max(p.id_price) as id_price " 
+							+ "from price p  "
+							+ "group by p.id_product, p.id_supermarket " 
+							+ ") currentPrice  "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+					+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and s.id_supermarket in( select * " 
+						+ "from (select p.id_supermarket  "
+							+ "from price p   "
+							+ "where p.id_user = ? "  
+							+ "group by id_supermarket "   
+							+ "order by count(p.id_supermarket) "
+							+ "limit 3) "
+						+ "a) "
+						+ "UNION "
+						+ "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
+						+ "from market_list ml, list_item li, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price "
+							+ "from price p, (  "
+								+ "select max(p.id_price) as id_price " 
+								+ "from price p  "
+								+ "group by p.id_product, p.id_supermarket " 
+								+ ") currentPrice  "
+							+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
+						+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket "
+						+ "and ml.id_user = ? and ml.id_market_list = li.id_market_list and li.id_product = op.id_product  "
+						+ "and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 and li.id_product in(select * " 
+							+ "from(select count(*) "
+									+ "from market_list ml1, list_item li1 "
+									+ "where ml1.id_user = ? and li1.id_market_list = ml1.id_market_list "
+									+ "group by li1.id_product  "
+									+ "order by count(*) desc "
+									+ "limit 5) favoriteProducts "
+								+ ") ";
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
 			ps = con.prepareStatement(query);
-			ps.setFloat(1, longitude);
-			ps.setFloat(2, latitude);
-			ps.setInt(3, idUser);
+			ps.setInt(1, idUser);
+			ps.setFloat(2, longitude);
+			ps.setFloat(3, latitude);
 			ps.setInt(4, idUser);
-			ps.setFloat(5, longitude);
-			ps.setFloat(6, latitude);
-			ps.setInt(7, idUser);
-			ps.setInt(8, idUser);
+			ps.setInt(5, idUser);
+			ps.setInt(6, idUser);
+			ps.setFloat(7, longitude);
+			ps.setFloat(8, latitude);
 			ps.setInt(9, idUser);
+			
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()){
 				Price price = new Price();

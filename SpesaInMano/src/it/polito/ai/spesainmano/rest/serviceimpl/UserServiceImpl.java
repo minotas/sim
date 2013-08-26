@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 		   		throw new CustomBadRequestException("There is another user registered with this email");
 		   	
 		   	}
-			
+			System.out.println(e.getMessage());
 		   	throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
 				
 		}

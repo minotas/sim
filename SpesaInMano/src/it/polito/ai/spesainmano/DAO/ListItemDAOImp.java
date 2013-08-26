@@ -15,11 +15,11 @@ public class ListItemDAOImp implements ListItemDAO{
 	public void insertListItems(List<ListItem> listItems, int idList) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "insert into list_item(id_market_list,id_product, quantity) values(?, ?, quantity)";
+		String query = "insert into list_item(id_market_list,id_product, quantity) values(?, ?, ?)";
 		try {
 			ps = con.prepareStatement(query);
 			int itemsNumber = listItems.size();
-			for(int i = 1; i < itemsNumber; i++){
+			for(int i = 0; i < itemsNumber; i++){
 				ps.setInt(1, idList);
 				ps.setInt(2, listItems.get(i).getId_product().getId_product());
 				ps.setInt(3, listItems.get(i).getQuantity());

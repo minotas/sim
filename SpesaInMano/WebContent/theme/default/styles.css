@@ -4,6 +4,7 @@ body {
     margin: 0px;
     padding: 0px;
     height: 100%;
+	background-color: #8b8b8b;
 }
 
 .sim_box_shadow{
@@ -148,7 +149,7 @@ body {
     padding: 5px 1px 5px 1px;
 }
 
-#sim_categories div{
+#sim_categories div.sim_subcategory{
 	float: left;
     height: 39px;
     width: 100px;
@@ -160,6 +161,19 @@ body {
     border-color: #3b9ec7;
 }
 
+#sim_categories div.sim_subcategory .sim_subcategory_label{
+	height: 40px;
+}
+
+.first_colunm {
+	border-right: 1px #ddd solid;
+	padding-right: 15px;
+}
+
+.second_colunm{
+	vertical-align: top;
+}
+
 .sim_menu_over{
     color: #fff;
     background-color: #3b9ec7;
@@ -167,7 +181,7 @@ body {
 
 #sim_categories div .sim_dropdown_toggle{
 	position: relative;
-	top: 30px;
+	top: 5px;
 	height: auto;
 	width: auto;
     color: #fff;
@@ -259,14 +273,16 @@ body {
     height: 100%;
 }
 
-#sim_body_offers{
+#sim_body_offers_external{
+	margin: 15px 15px 5px 5px;
 	min-height: 330px;
     height: 100%;
-	margin: 15px 15px 5px 15px;
 	border-radius: 3px 3px 3px 2px;
 	border: 1px #3b9ec7 solid;
 	background: #FAFAFA;
 	padding: 15px;
+	overflow: auto;
+	width: 93%;
 }
 
 #sim_loading{
@@ -277,6 +293,29 @@ body {
     left: 0;
     background: #ddd url(imgs/ajax-loader.png) no-repeat center;
     opacity: 0.7;
+}
+
+.sim_pagination{
+	border: 1px #3b9ec7 solid;
+	padding: 5px;
+	clear: both;
+}
+
+.sim_pagination span{
+	margin-right: 5px;
+	color: #3b9ec7;
+	cursor: pointer;
+}
+
+.sim_pagination span:hover{
+	text-decoration: underline;
+}
+
+.sim_pagination span.current{
+	cursor: default;
+	color: #848484;
+	text-decoration: underline;
+	font-weight: bold;
 }
 
 .obligatory{
@@ -298,7 +337,10 @@ body {
 	text-align: center;
 	vertical-align: middle;
 }
-
+.sim_products .ui-widget-header{
+	overflow: hide;
+	height: 40px;
+}
 .sim_products{
     height: 280px;
     width: 180px;
@@ -316,13 +358,27 @@ body {
 }
 
 .sim_image_product{
-	max-height: 100%;
+	max-height: 60%;
 	z-index: 2;
 	min-height: 165px; 
 	padding: 5px 0 5px 0;
-	max-width: 100%;
+	max-width: 80%;
 	vertical-align: middle;
 	border: 0;
+}
+
+.sim_product_detail{
+	clear: both;
+	padding-bottom: 35px;
+	width: 290px;
+}
+
+#sim_product_detail_trash{
+	float: right;
+	overflow: hide;
+}
+
+.sim_image_div{
 	text-align: center;
 }
 

@@ -152,7 +152,15 @@ public class ProductDAOImp implements ProductDAO{
 	public List<Price> getSimilarProductPrices(Product product, int supermarketId) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "select pri.price, pro.name, pro.brand, pro.quantity, pro.measure_unit from price pri, product pro where pri.id_product = pro.id_product and pro.id_product_type = ? and pro.id_product != ? and pro.quantity = ? and pro.measure_unit = ? and pri.id_supermarket = ? order by pri.price";
+		String query = "select pri.price, pro.name, pro.brand, pro.quantity, pro.measure_unit  "
+					+ "from price pri, product pro "
+					+ "where pri.id_product = pro.id_product and pro.id_product_type = ? "
+					+ "and pro.id_product != ? and pro.quantity = ? and pro.measure_unit = ? and pri.id_supermarket = ? " 
+					+ "and pri.id_price in(select max(id_price) " 
+						+ "from price "
+						+ "where id_supermarket = ? "
+						+ "group by id_product) "
+					+ "order by pri.price";
 		List<Price> prices = new ArrayList<Price>();
 		try {
 			ps = con.prepareStatement(query);
@@ -161,6 +169,7 @@ public class ProductDAOImp implements ProductDAO{
 			ps.setString(3, product.getQuantity());
 			ps.setString(4, product.getMeasure_unit());
 			ps.setInt(5, supermarketId);
+			ps.setInt(6, supermarketId);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()){
 	          Price p = new Price();

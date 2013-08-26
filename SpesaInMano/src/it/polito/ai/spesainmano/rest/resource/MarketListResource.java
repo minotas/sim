@@ -65,6 +65,7 @@ public class MarketListResource {
 
 	}
 	
+	@Path("/details")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public List<MarketListDetails> getDetails(@QueryParam("id_supermarket") int supermarketId, @Context HttpHeaders hh) {
