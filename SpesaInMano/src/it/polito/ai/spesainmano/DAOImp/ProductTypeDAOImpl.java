@@ -1,5 +1,6 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
+import it.polito.ai.spesainmano.DAO.ProductTypeDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.ProductType;
 

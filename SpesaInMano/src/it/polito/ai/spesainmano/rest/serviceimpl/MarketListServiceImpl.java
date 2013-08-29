@@ -1,13 +1,13 @@
 package it.polito.ai.spesainmano.rest.serviceimpl;
 
 import it.polito.ai.spesainmano.DAO.ListItemDAO;
-import it.polito.ai.spesainmano.DAO.ListItemDAOImp;
 import it.polito.ai.spesainmano.DAO.MarketListDAO;
-import it.polito.ai.spesainmano.DAO.MarketListDAOImp;
 import it.polito.ai.spesainmano.DAO.MonitoredSupermarketDAO;
-import it.polito.ai.spesainmano.DAO.MonitoredSupermarketDAOImp;
 import it.polito.ai.spesainmano.DAO.SupermarketDAO;
-import it.polito.ai.spesainmano.DAO.SupermarketDAOImpl;
+import it.polito.ai.spesainmano.DAOImp.ListItemDAOImp;
+import it.polito.ai.spesainmano.DAOImp.MarketListDAOImp;
+import it.polito.ai.spesainmano.DAOImp.MonitoredSupermarketDAOImp;
+import it.polito.ai.spesainmano.DAOImp.SupermarketDAOImpl;
 import it.polito.ai.spesainmano.model.ListItem;
 import it.polito.ai.spesainmano.model.MarketList;
 import it.polito.ai.spesainmano.model.Supermarket;

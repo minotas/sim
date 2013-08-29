@@ -1,7 +1,9 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
+import it.polito.ai.spesainmano.DAO.CategoryDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Category;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -1,5 +1,6 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
+import it.polito.ai.spesainmano.DAO.SupermarketDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Supermarket;
 
@@ -77,10 +78,6 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 	
 		}
 	
-	} catch (SQLException e) {
-	
-		throw e;
-	
 	} finally{
 	
 		ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
@@ -91,4 +88,46 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 
 	}
 
+	@Override
+	public List<Supermarket> getNearSupermarkets(float latitude, float longitude)throws SQLException{
+	con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+	PreparedStatement ps = null;
+	String query = "select s.id_supermarket, s.longitude, s.latitude, s.name "
+			+ "FROM supermarket s "
+			+ "WHERE SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120<=5000 "
+			+ "ORDER BY SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120";
+	
+	List<Supermarket> supermarkets = new ArrayList<Supermarket>();
+
+	try {
+	
+		ps = con.prepareStatement(query);
+		ps.setFloat(1, longitude);
+		ps.setFloat(2, latitude);
+		ps.setFloat(3, longitude);
+		ps.setFloat(4, latitude);
+		ResultSet rs = ps.executeQuery();
+	
+		while(rs.next()){
+	
+			Supermarket s = new Supermarket();
+			s.setId_supermarket(rs.getInt(1));
+			s.setLongitude(rs.getFloat(2));
+			s.setLatitude(rs.getFloat(3));
+			s.setName(rs.getString(4));
+			supermarkets.add(s);
+	
+		}
+	
+	} finally{
+	
+		ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+	
+	}
+	
+	return supermarkets;	
+		
+	}
+
+	
 }

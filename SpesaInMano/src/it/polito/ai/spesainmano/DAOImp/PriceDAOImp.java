@@ -1,9 +1,12 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
+import it.polito.ai.spesainmano.DAO.PriceDAO;
+import it.polito.ai.spesainmano.DAO.SupermarketDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.model.Supermarket;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -232,7 +235,7 @@ public class PriceDAOImp implements PriceDAO {
 						+ "group by p.id_product, p.id_supermarket " 
 						 + ") currentPrice "
 					+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
-				+ "where ms.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and oP.id_supermarket = ms.id_supermarket"
+				+ "where ms.id_user = ? and pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket and oP.id_supermarket = ms.id_supermarket "
 				+ "UNION "
 				+"Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
 				+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price  "
@@ -286,7 +289,7 @@ public class PriceDAOImp implements PriceDAO {
 	}
 
 	/*
-	 * Selects all the offer prices in the supermarkets that are in area of 2km radio 
+	 * Selects all the offer prices in the supermarkets that are in area of 2.5km radio 
 	 */
 	@Override
 	public List<Price> getGeneralOffers(float longitude, float latitude) throws SQLException {
@@ -300,7 +303,7 @@ public class PriceDAOImp implements PriceDAO {
 								+ "group by p.id_product, p.id_supermarket "
 								+ ") currentPrice "
 							+ "where p.id_price = currentPrice.id_price and p.type = 'o') oP "
-						+ "where op.id_product = pro.id_product and op.id_supermarket = s.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=2000 ";
+						+ "where op.id_product = pro.id_product and op.id_supermarket = s.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=2500 ";
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
@@ -386,9 +389,9 @@ public class PriceDAOImp implements PriceDAO {
 							+ "from price p "
 							+ "group by p.id_product, p.id_supermarket "
 						+ "	) currentPrice  "
-						+ "where p.id_price = currentPrice.id_price and p.type = 'n' ) oP "
+						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
 					+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket "
-					+ "and ml.id_user = 1 and ml.id_market_list = li.id_market_list and li.id_product = op.id_product  and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 ";
+					+ "and ml.id_user = ? and ml.id_market_list = li.id_market_list and li.id_product = op.id_product  and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 ";
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{

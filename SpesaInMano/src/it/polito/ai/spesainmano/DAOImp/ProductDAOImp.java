@@ -1,4 +1,4 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
 import it.polito.ai.spesainmano.model.Category;
 import it.polito.ai.spesainmano.model.Price;
@@ -9,6 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.polito.ai.spesainmano.DAO.ProductDAO;
 import it.polito.ai.spesainmano.db.*;
 
 public class ProductDAOImp implements ProductDAO{

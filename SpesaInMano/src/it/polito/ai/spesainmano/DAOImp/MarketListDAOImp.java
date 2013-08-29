@@ -1,5 +1,6 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
+import it.polito.ai.spesainmano.DAO.MarketListDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Supermarket;
 import it.polito.ai.spesainmano.responses.MarketListDetails;
@@ -47,7 +48,7 @@ public class MarketListDAOImp implements MarketListDAO{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		List<SupermarketListPrice> totalsList = new ArrayList<SupermarketListPrice>();
 		PreparedStatement ps = null;
-		String query = " SELECT SUM(li.quantity), SUM(li.quantity * a.actual_price) "
+		String query = " SELECT count(*), SUM(li.quantity * a.actual_price) "
 						+ "FROM list_item li, (SELECT p.price as actual_price, p.id_product as id_product "
 							+ "FROM price p, (SELECT max(p.id_price) as id_price "
 								+ "FROM price p " 
@@ -70,7 +71,10 @@ public class MarketListDAOImp implements MarketListDAO{
 		            slp.setLatitude(importantSupermarkets.get(i).getLatitude());
 		            slp.setLongitude(importantSupermarkets.get(i).getLongitude());
 					slp.setName(importantSupermarkets.get(i).getName());
-		            totalsList.add(slp);
+		           if(slp.getProducts_found() != 0){
+		        	   totalsList.add(slp);
+		           }
+					
 				}
 			}
 			Collections.sort(totalsList, new Comparator<Object>() {  
@@ -175,7 +179,7 @@ public class MarketListDAOImp implements MarketListDAO{
            MarketListDetails mld = new MarketListDetails();
             mld.setName(rs.getString(1));
             mld.setBrand(rs.getString(2));
-            mld.setMeasure(rs.getString(3) + rs.getString(4) );
+            mld.setMeasure(rs.getString(4) + " " + rs.getString(3) );
             mld.setQuantity(rs.getInt(5));
             mld.setPrice(rs.getFloat(6));
 			detailsList.add(mld);

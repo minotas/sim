@@ -13,4 +13,8 @@ public interface MonitoredSupermarketDAO {
 
 	public List<Supermarket> getMonitoredSupermarkets(int idUser) throws SQLException;
 
+	public List<MonitoredSupermarket> getSupermarkets(float latitude, float longitude, int userId) throws SQLException;
+	
+	
+
 }

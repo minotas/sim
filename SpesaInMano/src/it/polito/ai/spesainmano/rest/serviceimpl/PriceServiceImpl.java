@@ -4,11 +4,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 import it.polito.ai.spesainmano.DAO.MarketListDAO;
-import it.polito.ai.spesainmano.DAO.MarketListDAOImp;
 import it.polito.ai.spesainmano.DAO.PriceDAO;
-import it.polito.ai.spesainmano.DAO.PriceDAOImp;
 import it.polito.ai.spesainmano.DAO.UserDAO;
-import it.polito.ai.spesainmano.DAO.UserDAOImp;
+import it.polito.ai.spesainmano.DAOImp.MarketListDAOImp;
+import it.polito.ai.spesainmano.DAOImp.PriceDAOImp;
+import it.polito.ai.spesainmano.DAOImp.UserDAOImp;
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.responses.InsertPriceResponse;
 import it.polito.ai.spesainmano.responses.MarketListDetails;
@@ -190,18 +190,30 @@ public class PriceServiceImpl implements PriceService{
 			PriceDAO priceDao = new PriceDAOImp();
 			switch(marketListNumber){
 			case 0: List<Price> offers = priceDao.getOffersMonitored(idUser, latitude, longitude);
-					if(offers.size() > 0){
-						return priceDao.getGeneralOffers(longitude, latitude);
+					if(offers.size() == 0){
+						List<Price> generalOffers = priceDao.getGeneralOffers(longitude, latitude); 
+						if(generalOffers.size() == 0){
+							throw new CustomNotFoundException("Offers not found");
+						}
+						else return generalOffers;
 					}
 					return offers;
 			case 1: List<Price> offersOneList = priceDao.getOffersProductsInOneList(idUser, latitude, longitude);
-					if(offersOneList.size() > 0){
-						return priceDao.getGeneralOffers(longitude, latitude);
+					if(offersOneList.size() == 0){
+						List<Price> generalOffers = priceDao.getGeneralOffers(longitude, latitude); 
+						if(generalOffers.size() == 0){
+							throw new CustomNotFoundException("Offers not found");
+						}
+						else return generalOffers;
 					}
 					return offersOneList;
 			default: List<Price> offersMultipleList = priceDao.getOffersProductsInMultipleLists(idUser, latitude, longitude);
-			if(offersMultipleList.size() > 0){
-				return priceDao.getGeneralOffers(longitude, latitude);
+			if(offersMultipleList.size() == 0){
+				List<Price> generalOffers = priceDao.getGeneralOffers(longitude, latitude); 
+				if(generalOffers.size() == 0){
+					throw new CustomNotFoundException("Offers not found");
+				}
+				else return generalOffers;
 			}
 			return offersMultipleList;
 			}

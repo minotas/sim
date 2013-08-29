@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import it.polito.ai.spesainmano.DAO.SupermarketDAO;
-import it.polito.ai.spesainmano.DAO.SupermarketDAOImpl;
+import it.polito.ai.spesainmano.DAOImp.SupermarketDAOImpl;
 import it.polito.ai.spesainmano.model.Supermarket;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
 import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;

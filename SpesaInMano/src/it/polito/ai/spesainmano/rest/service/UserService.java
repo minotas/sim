@@ -15,6 +15,6 @@ public interface UserService {
 	
 	User getUserInfo(int id) throws CustomNotFoundException, CustomServiceUnavailableException ;
 	
-	int getPoints(int id) throws SQLException;
+	//int getPoints(int id) throws SQLException;
 
 }

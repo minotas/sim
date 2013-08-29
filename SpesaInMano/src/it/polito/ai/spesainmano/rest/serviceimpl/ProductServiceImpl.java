@@ -18,9 +18,9 @@ import sun.misc.BASE64Decoder;
 import com.sun.jersey.core.util.Base64;
 
 import it.polito.ai.spesainmano.DAO.ProductDAO;
-import it.polito.ai.spesainmano.DAO.ProductDAOImp;
 import it.polito.ai.spesainmano.DAO.ProductTypeDAO;
-import it.polito.ai.spesainmano.DAO.ProductTypeDAOImpl;
+import it.polito.ai.spesainmano.DAOImp.ProductDAOImp;
+import it.polito.ai.spesainmano.DAOImp.ProductTypeDAOImpl;
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
@@ -62,9 +62,10 @@ public class ProductServiceImpl implements ProductService {
 
 		String filename = String.valueOf(id) + ".jpg";
 		String finalfile = "";
-		String workingDir = System.getProperty("user.dir");
-
-		finalfile = workingDir + File.separator + filename;
+		//String workingDir = System.getProperty("user.dir");
+//
+		//finalfile = workingDir + File.separator + filename;
+		finalfile = filename;
 		BufferedImage image = null;
 		byte[] imageByte;
 		try {

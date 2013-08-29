@@ -99,20 +99,28 @@ public class ConnectionPoolManager
 		{
 			connection = (Connection) connectionPool.firstElement();
 			connectionPool.removeElementAt(0);
+			return connection;
 		}
 		//Giving away the connection from the connection pool
-		return connection;
+		return createNewConnectionForPool();
 	}
 
 	public synchronized void returnConnectionToPool(Connection connection)
 	{
+		final int MAX_POOL_SIZE = 10;
+		
+		if(connectionPool.size() > MAX_POOL_SIZE){
+			try {
+				connection.close();
+				return;
+			} catch (SQLException e) {
+				System.out.println("Error closing a connection");
+				return;
+			}
+		}
 		//Adding the connection from the client back to the connection pool
 		connectionPool.addElement(connection);
 	}
 
-	/*public static void main(String args[])
-	{
-		ConnectionPoolManager ConnectionPoolManager = new ConnectionPoolManager();
-	}*/
 
 }

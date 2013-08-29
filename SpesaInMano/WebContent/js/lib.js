@@ -397,16 +397,26 @@ sim.open_products_detail = function(){
 	//var listItem = $.cookie('myCart');
 	//var obj_listItem = jQuery.parseJSON(''+listItem+'');
 	//console.log(obj_listItem);
-	for(var i = 0; i < sim.db.carts[sim.current_id_user].listItem.length; i ++){
-		//var html = '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+obj_listItem.listItem[i]+'</li>';
-		$("#sim_products_detail_window ul").append(tpl_product_detail(sim.db.carts[sim.current_id_user].listItem[i]));
+	if(sim.db.carts[sim.current_id_user].listItem.length == null){
+		$('#sim_products_detail_window').show();
+		$('#sim_products_detail_window').html('<p>There is not products in the cart<p>');
+		$("#sim_products_detail_window").dialog({
+		  width: 420,
+		  modal: true
+		});
 	}
-	//$("#sim_products_detail_window ul").append('<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 1</li>');
-	$('#sim_products_detail_window').show();
-	$("#sim_products_detail_window").dialog({
-      width: 350,
-      modal: true
-    });
+	else{
+		for(var i = 0; i < sim.db.carts[sim.current_id_user].listItem.length; i ++){
+			//var html = '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+obj_listItem.listItem[i]+'</li>';
+			$("#sim_products_detail_window ul").append(tpl_product_detail(sim.db.carts[sim.current_id_user].listItem[i]));
+		}
+		//$("#sim_products_detail_window ul").append('<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 1</li>');
+		$('#sim_products_detail_window').show();
+		$("#sim_products_detail_window").dialog({
+		  width: 420,
+		  modal: true
+		});
+	}
 };
 
 sim.open_send_cart = function(){
@@ -423,29 +433,55 @@ sim.send_cart = function(){
 	var data = {"listItem":sim.db.carts[sim.current_id_user].listItem};
 	sim.loading(true);
 	$.ajax({
-            url: sim.rest_uri + 'marketList',
-            data: JSON.stringify(data),
-            type: 'POST',
-            contentType: 'application/json',
-            success : function(data) {
-                console.log(data);
-            	sim.loading(false);
-                /*if(data.id_user){
-                    $('#sim_form_register').dialog('close');
-                    sim.print_message('The user was registered successful');
-                }
-                else if(data.response){
-                    sim.print_message(data.response, sim.message_types.error);
-                }
-                else{
-                    sim.print_message(data, sim.message_types.error);
-                }*/
-            },
-            error:function(data){
-            	sim.print_message(data.responseText, sim.message_types.error);
-            }
-        });
-}
+		url: sim.rest_uri + 'marketList',
+		data: JSON.stringify(data),
+		type: 'POST',
+		contentType: 'application/json',
+		success : function(data) {
+			console.log(data);
+			sim.loading(false);
+			if(data.id){
+				sim.validate_cart();
+			}
+			else if(data.response){
+				sim.print_message(data.response, sim.message_types.error);
+			}
+			else{
+				sim.print_message(data, sim.message_types.error);
+			}
+		},
+		error:function(data){
+			sim.print_message(data.responseText, sim.message_types.error);
+		}
+	});
+};
+
+sim.validate_cart = function(){
+	//window.localStorage["carts"] = '';
+	//sim.getuser();
+	$.ajax({
+		url: sim.rest_uri + 'marketList',
+		type: 'GET',
+		success : function(data) {
+			alert(data);
+			console.log(data);
+			sim.loading(false);
+			/*if(data.id){
+				sim.validate_cart();
+			}
+			else if(data.response){
+				sim.print_message(data.response, sim.message_types.error);
+			}
+			else{
+				sim.print_message(data, sim.message_types.error);
+			}*/
+		},
+		error:function(data){
+			sim.print_message(data.responseText, sim.message_types.error);
+		}
+	});
+	
+};
 
 /************************ OTHERS FUNCTIONS **********************************/
 sim.print_message = function (text, type) {
@@ -782,7 +818,7 @@ var tpl_product = function(product_obj){
     html += '<div class="ui-widget-header">'+product_obj.name+' '+product_obj.brand+'</div><div>';
     html +='<div class="sim_image_div"><img src="./product_images/'+product_obj.id_product+'.jpg" class="sim_image_product"/></div>';
     html += '<hr></hr><div><span class = "sim_static_block_label">'+product_obj.quantity+' '+product_obj.measure_unit+'</span></div>';
-		html += '<div class="sim_product_add_button"><span id="sim_product_add_button_'+product_obj.id_product+'" class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id_product+', \''+product_obj.name+'\' , '+false+');">Add to Cart</span></div></div>';
+	html += '<div class="sim_product_add_button"><span id="sim_product_add_button_'+product_obj.id_product+'" class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id_product+', \''+product_obj.name+'\' , '+false+');">Add to Cart</span></div></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-minus"></span></span></div>';
     html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product+'">0</span>';
 	html += '<input id="sim_input_quantity_'+product_obj.id_product+'" type="hidden" value="0"/></div>';
@@ -797,7 +833,7 @@ var tpl_product_detail = function(product_obj){
     html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product.id_product+'">'+product_obj.quantity+'</span>';
     html += '<input id="sim_input_quantity_'+product_obj.id_product.id_product+'" type="hidden" value="'+product_obj.quantity+'"/></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product.id_product+', '+true+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
-	html += '<div class="sim_product_quantity" >'+product_obj.id_product.name_product+'</div>';
+	html += '<div class="sim_product_quantity" >'+product_obj.id_product.name+'</div>';
 	html += '<div class="sim_product_quantity" id="sim_product_detail_trash"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.delete_from_cart('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-trash"></span></div> </div>';
     
     

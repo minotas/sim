@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import it.polito.ai.spesainmano.DAO.ProductTypeDAO;
-import it.polito.ai.spesainmano.DAO.ProductTypeDAOImpl;
+import it.polito.ai.spesainmano.DAOImp.ProductTypeDAOImpl;
 import it.polito.ai.spesainmano.model.ProductType;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.ProductTypeService;

@@ -11,6 +11,8 @@ public interface SupermarketDAO {
 	public List<Supermarket> checkin(float latitude, float longitude) throws SQLException;
 	
 	public List<Supermarket> getMostVisitedSupermarkets(int userId) throws SQLException;
+
+	public List<Supermarket> getNearSupermarkets(float latitude, float longitude) throws SQLException;
 	
 	
 }

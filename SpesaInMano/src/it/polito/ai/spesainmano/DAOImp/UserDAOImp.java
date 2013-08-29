@@ -1,4 +1,4 @@
-package it.polito.ai.spesainmano.DAO;
+package it.polito.ai.spesainmano.DAOImp;
 
 import it.polito.ai.spesainmano.model.User;
 
@@ -6,8 +6,10 @@ import it.polito.ai.spesainmano.model.User;
 
 
 
+
 import java.sql.*;
 
+import it.polito.ai.spesainmano.DAO.UserDAO;
 import it.polito.ai.spesainmano.db.*;
 
 public class UserDAOImp implements UserDAO{
