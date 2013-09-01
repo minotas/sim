@@ -4,7 +4,7 @@ import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.User;
 import it.polito.ai.spesainmano.responses.InsertPriceResponse;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
-import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.PriceService;
 import it.polito.ai.spesainmano.rest.serviceimpl.PriceServiceImpl;
 
@@ -36,7 +36,7 @@ public class PriceResource {
 		
 		Map<String, Cookie> pathParams = hh.getCookies();
 		if (!pathParams.containsKey("id_user")) {
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
 		Price price = p;
 		User u = new User();
@@ -56,7 +56,7 @@ public class PriceResource {
 
 		Map<String, Cookie> pathParams = hh.getCookies();
 		if (!pathParams.containsKey("id_user")) {
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
 		
 		priceService = new PriceServiceImpl();
@@ -73,7 +73,7 @@ public class PriceResource {
 
 		Map<String, Cookie> pathParams = hh.getCookies();
 		if (!pathParams.containsKey("id_user")) {
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
 		
 		int idUser = Integer.parseInt(pathParams.get("id_user").getValue());

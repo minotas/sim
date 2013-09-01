@@ -8,12 +8,11 @@ import it.polito.ai.spesainmano.DAO.UserDAO;
 import it.polito.ai.spesainmano.DAOImp.UserDAOImp;
 import it.polito.ai.spesainmano.model.User;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
-import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.UserService;
 
 /**
- * Defines the functions related with the users business logic
+ * Defines the functions related with the users in the business logic
  * @version 1.0
  */
 public class UserServiceImpl implements UserService {
@@ -66,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	 * @param user An user object containing the user information to do the registration
 	 * @return an user object containing the information of the user, including the id assigned.
 	 * @throws CustomBadRequestException Generated when the user is already registered
-	 * @throws CustomServiceUnavailable Generated when the service is not available
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
 	 */
 	@Override
 	public User create(User u) throws  CustomBadRequestException, CustomServiceUnavailableException{
@@ -91,7 +90,7 @@ public class UserServiceImpl implements UserService {
 		UserDAO uDao = new UserDAOImp();
 		return uDao.getPoints(id);
 	}
-	 */
+	
 	
 	@Override
 	public User getUserInfo(int id) throws CustomNotFoundException{
@@ -110,5 +109,7 @@ public class UserServiceImpl implements UserService {
 		   	throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
 		}
 	}
+	
+	 */
 
 }

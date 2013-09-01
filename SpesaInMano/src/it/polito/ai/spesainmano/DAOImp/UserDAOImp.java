@@ -1,20 +1,23 @@
 package it.polito.ai.spesainmano.DAOImp;
 
 import it.polito.ai.spesainmano.model.User;
-
-
-
-
-
-
 import java.sql.*;
-
 import it.polito.ai.spesainmano.DAO.UserDAO;
 import it.polito.ai.spesainmano.db.*;
 
+/**
+ * Defines the functions required to the database access related with the user
+ * @version 1.0
+ */
 public class UserDAOImp implements UserDAO{
 	Connection con;
 	
+	/**
+	 * Inserts a new user in the database
+	 * @param user An user object containing the user information to do the registration
+	 * @return an user object containing the information of the user, including the id assigned.
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	public User insert(User u) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
@@ -33,14 +36,20 @@ public class UserDAOImp implements UserDAO{
 	            int id = rs.getInt(1);
 	            u.setId_user(id);
 			}
-		}catch (SQLException e) {
-			throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 		return u;
 	}
 	
+	/**
+	 * Verifies that the user exists in the database and the password is correct
+	 * @param email Email of the user(username)
+	 * @param password Password of the user
+	 * @return If the user exists an user object containing the id, name, lastaname and points of a user, 
+	 *		   otherwise returns null
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	public User login(String email, String password) throws SQLException {
 	
 		User u = null;
@@ -56,23 +65,14 @@ public class UserDAOImp implements UserDAO{
 			ResultSet rs = ps.executeQuery();
 			
 			if(rs.next()){
-			
 				u = new User();
 				u.setId_user(rs.getInt(1));
 				u.setName(rs.getString(2));
 				u.setLastname(rs.getString(3));
 				u.setPoints(rs.getInt(4));
-			
 			}
-		
-		} catch (SQLException e) {
-			
-			throw e;
-		
 		} finally{
-		
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
-		
 		}
 		
 		return u;
@@ -96,11 +96,7 @@ public class UserDAOImp implements UserDAO{
 			
 			}
 		
-		}catch (SQLException e) {
-		
-			throw e;
-		
-		} finally{
+		}finally{
 			
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		
@@ -109,38 +105,35 @@ public class UserDAOImp implements UserDAO{
 		return -1;
 	}
 
+	
+	/**
+	 * Increments the user points by 5
+	 * @param userId The id of the user
+	 * @return true if success, otherwise false
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
-	public boolean incrementPoints(int id_user) throws SQLException {
+	public boolean incrementPoints(int userId) throws SQLException {
 		
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		String query = "update user set points = points + 5 where id_user = ?";
 	
 		try {
-			
 			ps = con.prepareStatement(query);
-			ps.setInt(1, id_user);
+			ps.setInt(1, userId);
 			
 			if(ps.executeUpdate() > 0){
-			
 				return true;
-		
 			} 
-			
-		}catch (SQLException e) {
-		
-			throw e;
-		
 		} finally{
-		
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
-		
 		}
 		
 		return false;
 	}
 
-	@Override
+	/*@Override
 	public User getUser(int id) throws SQLException {
 		
 		User u = null;
@@ -177,6 +170,6 @@ public class UserDAOImp implements UserDAO{
 		
 		return u;
 	
-	}
+	}*/
 
 }

@@ -5,7 +5,6 @@ import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.MonitoredProduct;
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.model.User;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MonitoredProductDAOImp implements MonitoredProductDAO{
+	
 	Connection con;
 
 	@Override
@@ -71,20 +71,22 @@ public class MonitoredProductDAOImp implements MonitoredProductDAO{
 	public void getDeleteMonitoredProducts(List<MonitoredProduct> mpList, User u) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = "DELETE "
-				+ "FROM monitored_product mp "
-				+ "WHERE mp.id_user = ? and mp.id_product = ?";
-		try {
-			ps = con.prepareStatement(query);
-			int monitoredProductsNumber = mpList.size();
-			for(int i = 0; i < monitoredProductsNumber; i++){
+		String query = "DELETE " + "FROM monitored_product "
+				+ "WHERE id_user = ? and id_product = ?";
+
+		ps = con.prepareStatement(query);
+		int monitoredProductsNumber = mpList.size();
+		for (int i = 0; i < monitoredProductsNumber; i++) {
+			try {
 				ps.setInt(1, u.getId_user());
-				ps.setInt(2,mpList.get(i).getId_product().getId_product());
+				ps.setInt(2, mpList.get(i).getId_product().getId_product());
 				ps.executeUpdate();
+
+			} catch (SQLException e) {
+				continue;
 			}
-		} finally{
-			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
+		ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		return;
 	}
 

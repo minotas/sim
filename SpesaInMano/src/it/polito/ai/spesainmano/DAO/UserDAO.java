@@ -16,6 +16,6 @@ public interface UserDAO {
 	
 	public boolean incrementPoints(int id_user) throws SQLException;
 
-	public User getUser(int id) throws SQLException;
+	//public User getUser(int id) throws SQLException;
 	
 }

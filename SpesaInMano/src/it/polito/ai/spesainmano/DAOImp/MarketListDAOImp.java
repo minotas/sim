@@ -3,8 +3,10 @@ package it.polito.ai.spesainmano.DAOImp;
 import it.polito.ai.spesainmano.DAO.MarketListDAO;
 import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Supermarket;
-import it.polito.ai.spesainmano.responses.MarketListDetails;
+import it.polito.ai.spesainmano.responses.MarketListDetail;
 import it.polito.ai.spesainmano.responses.SupermarketListPrice;
+import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
+import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,19 +18,33 @@ import java.util.List;
 import java.util.Collections;  
 import java.util.Comparator;
 
+/**
+ * Defines the functions required to the database access related with the market lists
+ * @version 1.0
+ */
+
 public class MarketListDAOImp implements MarketListDAO{
 	Connection con;
 
+	/**
+	 * Inserts a new marketList in the database
+	 * @param user An user object containing the user information to do the registration
+	 * @return The id assigned to the new market list
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
 	public int insert(int idUser) throws SQLException {
+		
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		String query = "insert into market_list(id_user, date) values(?, CURDATE())";
+		
 		try {
 			ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			ps.setInt(1, idUser);
 			ps.executeUpdate();
 			ResultSet rs = ps.getGeneratedKeys();
+		
 			if(rs.next()){
 	           return rs.getInt(1);
 			}
@@ -36,14 +52,19 @@ public class MarketListDAOImp implements MarketListDAO{
 				return 0;
 			}
 			
-		}catch (SQLException e) {
-			 throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-	
+	/**
+	 * Gets the total price of a market list in some important supermarkets 
+	 * @param importantSupermarkets The list of supermarket in which will be calculated the total price of the market list
+	 * @param marketListId The id of the market list
+	 * @return A list of SupermarketListPrice objects containing the products found and total price of the market list
+	 * 		   in the supermarkets 
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	public List<SupermarketListPrice> getTotal(List<Supermarket> importantSupermarkets, int marketListId) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		List<SupermarketListPrice> totalsList = new ArrayList<SupermarketListPrice>();
@@ -102,64 +123,85 @@ public class MarketListDAOImp implements MarketListDAO{
 	                }  
 	            }  
 	        });
-		}catch (SQLException e) {
-			 throw e;
-		} finally{
+		}finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 		return totalsList;
 	}
 
-
+	/**
+	 * Gets the number of market list of an user 
+	 * @param userId The id of the user
+	 * @return The number of market lists created by the user 
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
-	public int getNumberOfMarketLists(int idUser) throws SQLException {
+	public int getNumberOfMarketLists(int userId) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		String query = "select count(id_market_list) from market_list list where id_user = ?";
+		String query = "select count(id_market_list) "
+				+ "from market_list list "
+				+ "where id_user = ?";
+		
 		try {
 			ps = con.prepareStatement(query);
-			ps.setInt(1, idUser);
+			ps.setInt(1, userId);
 			rs = ps.executeQuery();
 			rs.next();
 	        return rs.getInt(1);
 			
-		}catch (SQLException e) {
-			 throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-
+	
+	/**
+	 * Obtains the id of the last market list created by the user
+	 * @param userId The id of the user getting the request
+	 * @return The id of the last market list. If the user does not have any market list, returns 0
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
-	public int getLastMarketListId(int idUser) throws SQLException {
+	public int getLastMarketListId(int userId) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		String query = "select max(ml.id_market_list) from market_list ml where ml.id_user = ? group by ml.id_user";
+		String query = "select max(ml.id_market_list) "
+				+ "from market_list ml "
+				+ "where ml.id_user = ? "
+				+ "group by ml.id_user ";
+		
 		try {
 			ps = con.prepareStatement(query);
-			ps.setInt(1, idUser);
+			ps.setInt(1, userId);
 			rs = ps.executeQuery();
+			
 			if(rs.next()){
 				return rs.getInt(1);
 			}
-	        return 0;
+	        
+			return 0;
 			
-		}catch (SQLException e) {
-			 throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
 
-	
+	/**
+	 * Gets the detailed information of a market list in a specific supermarket 
+	 * @param supermarketId The id of the supermarket
+	 * @param marketListId The id of the market list
+	 * @return A list of MarketListDetail objects the product info of each item in the supermarket list
+	 * 		   and its price in the supermarket
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
-	public List<MarketListDetails> getDetails(int supermaketId, int marketListId) throws SQLException{
+	public List<MarketListDetail> getDetails(int supermaketId, int marketListId) throws SQLException{
 	con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
-	List<MarketListDetails> detailsList = new ArrayList<MarketListDetails>();
+	List<MarketListDetail> detailsList = new ArrayList<MarketListDetail>();
 	PreparedStatement ps = null;
 	ResultSet rs = null;
 	String query = "  SELECT p.name, p.brand, p.measure_unit, p.quantity, li.quantity, li.quantity * a.actual_price "
@@ -175,8 +217,9 @@ public class MarketListDAOImp implements MarketListDAO{
 		ps.setInt(1, supermaketId);
 		ps.setInt(2, marketListId);
 		rs = ps.executeQuery();
+		
 		while(rs.next()){
-           MarketListDetails mld = new MarketListDetails();
+           MarketListDetail mld = new MarketListDetail();
             mld.setName(rs.getString(1));
             mld.setBrand(rs.getString(2));
             mld.setMeasure(rs.getString(4) + " " + rs.getString(3) );
@@ -185,8 +228,6 @@ public class MarketListDAOImp implements MarketListDAO{
 			detailsList.add(mld);
 		}
 		
-	}catch (SQLException e) {
-		 throw e;
 	} finally{
 		ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 	}

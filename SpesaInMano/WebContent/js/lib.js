@@ -37,7 +37,7 @@ $(function() {
                                    modal: true,
                                    buttons: { "send": function() { sim.clean_register(); var flag = sim.valida_form_register(); if(!flag){sim.new_user();} },
                                            "cancel": function() { $(this).dialog("close"); } } });
-    sim.getuser();
+	sim.getuser();
 });    
 
 
@@ -49,6 +49,7 @@ var sim = {
     timer : {value: 0},
 	pagination: {records_by_page : 4, max_before_pagination : 8, current_pages : []},
 	current_subcategory : null,
+	monitored_supermarket : 0,
 	db : {products : [], carts : []}
     };
 
@@ -79,7 +80,6 @@ sim.new_user = function () {
             type: 'POST',
             contentType: 'application/json',
             success : function(data) {
-                //console.log(data);
             	sim.loading(false);
                 if(data.id_user){
                     $('#sim_form_register').dialog('close');
@@ -126,17 +126,11 @@ sim.authentication = function(){
         type: 'POST',
        contentType: 'application/json',
         success : function(data) {
-        	//console.log(data);
             if(data.id_user){
             	$.cookie('name', ''+data.name);
             	$.cookie('lastname', ''+data.lastname);
             	$.cookie('id_user', data.id_user);
                 sim.current_rol = sim.roles.user;
-				sim.cart
-                //sim.change_auth();
-            	/*var html = 'Welcome Mr./Ms.: '+data.name + ' '+data.lastname+'</i> ';
-                html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
-                $('#sim_form_login').html(html);*/
 				sim.getuser();
                 sim.load_home();
             }
@@ -174,35 +168,57 @@ sim.change_auth = function(){
 		$("#sim_categories").show();
 		$("#sim_body_offers_external").show();
 		sim.get_categories();
-		sim.get_offers();
+		//sim.get_offers();
         break; 
     }
 };
 
-sim.get_offers = function(){
-	$("#sim_body_offers").empty();
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$("#sim_body_offers").append(tpl_product);
-	$('#sim_body_offers').css("width", 10*192);
+sim.get_offers = function(position){
+	sim.latitude = position.coords.latitude;
+	sim.longitude = position.coords.longitude;
+	var data_params = {"latitude" : sim.latitude,
+			"longitude" : sim.longitude
+	};
+	console.log(data_params);
+	
+	$.ajax({
+        url: sim.rest_uri + 'price/offers',
+        type: 'GET',
+		data: data_params,
+        success : function(data) {
+			console.log(data);
+			var offers_array = Object.prototype.toString.call( data.price ) === '[object Array]' ? data.price : [data.price];
+            if(offers_array.length > 0){
+				$("#sim_nav").hide();
+				$("#sim_body_menu").hide();
+				$("#sim_body_body").hide();
+				$("#sim_body_offers").empty();
+            	for(var i = 1; i < offers_array.length; i++){
+					$("#sim_body_offers").append(tpl_product_offer(offers_array[i]));
+				}
+				$('#sim_body_offers').css("width", 10*192);
+				$("#sim_body_offers_external").show();
+            }
+            else{
+                sim.print_message(data, sim.message_types.error);
+            }
+        },
+        error:function(data){
+			//alert("error");
+        	sim.print_message(data.responseText, sim.message_types.error);
+        }
+    });
+	
 	//$("#sim_body_products").show();
 };
 
 sim.get_categories = function(){
 	$("#sim_categories").html('');
-	$("#sim_categories").append('<div class="sim_subcategory" onclick="">Offers<div id="uno" style="display:none;">uno hola</div></div>');
+	$("#sim_categories").append('<div class="sim_subcategory" onclick="sim.getuser();">Offers<div id="uno" style="display:none;">uno hola</div></div>');
     $.ajax({
         url: sim.rest_uri + 'category',
         type: 'GET',
         success : function(data) {
-        	//console.log(data.category[1]);
             if(data.category.length > 0){
             	sim.load_categories(data);
             }
@@ -226,7 +242,6 @@ sim.load_categories = function (data){
 
 sim.get_subcategory = function(id, name){
 	sim.current_subcategory_name = name;
-	//console.log(id);
 	$.ajax({
         url: sim.rest_uri + 'category/' + id + '/productType/',
         type: 'GET',
@@ -276,7 +291,6 @@ sim.get_subcategory_products = function(id, name){
         type: 'GET',
         data: data_param,
         success : function(data) {
-        	//console.log(data);
             if(data != null){
 				sim.db.products = Object.prototype.toString.call( data.product ) === '[object Array]' ? data.product : [data.product];
             	sim.load_products();
@@ -295,7 +309,6 @@ sim.get_subcategory_products = function(id, name){
 sim.load_products = function(){
 	var data = sim.db.products;
 	$("#sim_body_products").html('');
-	console.log(data);
 	if(!sim.pagination.current_pages[sim.current_subcategory]){
 		sim.pagination.current_pages[sim.current_subcategory] = 1;
 	}
@@ -336,43 +349,86 @@ sim.logout = function(){
     sim.load_home();
 };
 
+sim.get_monitored_supermarket = function(){
+	$.ajax({
+        url: sim.rest_uri + 'monitoredSupermarket',
+        type: 'GET',
+        success : function(data) {
+			
+			if(data){
+				console.log(data);
+			
+            }
+            else{
+                sim.print_message(data, sim.message_types.error);
+            }
+        },
+        error:function(data){
+			//alert("error");
+        	sim.print_message(data.responseText, sim.message_types.error);
+        }
+    });
+};
+
 sim.getuser = function(){
-	//window.localStorage["carts"] = '';
-	//window.localStorage["buttons_state"] = '';
+	//window.localStorage["buttons_state"] = null;
+	sim.getLocation();
+	//window.localStorage = null;
+	//sim.db.carts = JSON.stringify(eval(window.localStorage["carts"]));
+	//console.log(sim.db.carts);
+	//alert("user");
 	if($.cookie('name') != null){
+		sim.get_monitored_supermarket();
 		sim.current_name = $.cookie('name');
 		sim.current_lastname = $.cookie('lastname');
 		sim.current_id_user = $.cookie('id_user');
 		sim.current_rol = sim.roles.user;
-		var html = 'Welcome Mr./Ms.: <i>'+sim.current_name + ' '+sim.current_lastname+'</i> ';
-        html += '<a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">(logout)</a>';
+		var html = '<button data-toggle="dropdown" class="btn btn-user dropdown-toggle">'+sim.current_name+'<span class="caret"></span></button>';
+		html += '<ul class="dropdown-menu"><li><a href="javascript:;" onclick="sim.show_cart_lists()" class="ui-button-text sim_login"><strong>My cart lists</strong></a></li><li><a href="javascript:;" onclick="sim.monitoring_supermarket()" class="ui-button-text sim_login"><strong>My supermarkets</strong></a></li>';
+		html += '<li><a href="javascript:;" onclick="sim.show_gifts()" class="ui-button-text sim_login"><strong>My Gifts</strong></a></li>';
+		html += '<li class="divider"></li><li><a href="javascript:;" onclick="sim.logout()" class="ui-button-text sim_login">Logout</a></li></ul>';
         $('#sim_form_login').html(html);
-		if(window.localStorage.carts){
-			sim.db.carts = jQuery.parseJSON( window.localStorage["carts"] );
-			console.log(sim.db.carts[sim.current_id_user]);
-		}
-		else{
+		try {
+			if (localStorage.getItem) {
+				if(Object.prototype.toString.call( window.localStorage.carts ) === '[object Undefined]'){
+					
+					sim.db.carts = new Array;
+					sim.db.carts[sim.current_id_user] = {array_position : 0, number_products : 0, listItem : [] };
+					window.localStorage.carts = JSON.stringify(sim.db.carts);
+					console.log(window.localStorage.carts);
+				}
+				else{
+					
+					sim.db.carts =  JSON.parse(window.localStorage.carts);
+					console.log(sim.db.carts[sim.current_id_user]);
+					if(sim.db.carts[sim.current_id_user] == null){
+						sim.db.carts[sim.current_id_user] = {array_position : 0, number_products : 0, listItem : [] };
+						window.localStorage.carts = JSON.stringify(sim.db.carts);
+					}
+					console.log(sim.db.carts);
+					
+				}
+			}
+		} catch(e) {
+			sim.db.carts = new Array;
 			sim.db.carts[sim.current_id_user] = {array_position : 0, number_products : 0, listItem : [] };
-			window.localStorage["carts"] = JSON.stringify(sim.db.carts);
 		}
 		
-		if(window.localStorage.buttons_state){
+		/*if(window.localStorage.buttons_state){
 			sim.buttons_state =  window.localStorage.buttons_state ;
 			sim.buttons_state = jQuery.parseJSON( window.localStorage["buttons_state"] );
-			console.log(sim.buttons_state);
 		}
 		else{
 			sim.buttons_state = [];
 			window.localStorage["buttons_state"] = JSON.stringify(sim.buttons_state = []);
-		}
-		
+		}*/
+		console.log(sim.current_id_user);
 		$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>'+sim.db.carts[sim.current_id_user].number_products+' PRODUCTS</strong></p></a>');
 	}
 	else{
         sim.current_rol = sim.roles.guest;
         sim.load_home();
     }
-	//sim.db.carts[sim.current_id_user].listItem.splice(2, 1);
     sim.change_auth();
 };
 
@@ -396,7 +452,6 @@ sim.open_products_detail = function(){
 	$("#sim_products_detail_window ul").empty();
 	//var listItem = $.cookie('myCart');
 	//var obj_listItem = jQuery.parseJSON(''+listItem+'');
-	//console.log(obj_listItem);
 	if(sim.db.carts[sim.current_id_user].listItem.length == null){
 		$('#sim_products_detail_window').show();
 		$('#sim_products_detail_window').html('<p>There is not products in the cart<p>');
@@ -463,24 +518,72 @@ sim.validate_cart = function(){
 		url: sim.rest_uri + 'marketList',
 		type: 'GET',
 		success : function(data) {
-			alert(data);
-			console.log(data);
 			sim.loading(false);
-			/*if(data.id){
-				sim.validate_cart();
+			if(data.supermarketListPrice){
+				sim.loading(true);
+				var supermarket_array = Object.prototype.toString.call( data.supermarketListPrice ) === '[object Array]' ? data.supermarketListPrice : [data.supermarketListPrice];
+				$('#sim_body_menu').hide();
+				$('#sim_body_body').hide();
+				$('#sim_body_offers').html($('#sim_accordion'));
+				$( "#sim_accordion" ).empty();
+				for(var i = 0; i < supermarket_array.length; i++){
+					$( "#sim_accordion" ).append(tpl_supermarket_list(supermarket_array[i]));
+				}
+				$('#sim_body_offers').show();
+				$( "#sim_accordion" ).show();
+				$( "#sim_accordion" ).accordion({
+				  collapsible: true,
+				  active: false,
+				  heightStyle: "content",
+				  activate: function( event, ui ) { 
+					  //sim.load_supermarketlist_detail($(this).attr("id")); 
+					  var currentHeaderID = ui.newHeader.attr("id");
+					  console.log(currentHeaderID);
+					  sim.load_supermarketlist_detail(currentHeaderID); 
+				  }
+				});
+				sim.loading(false);
 			}
 			else if(data.response){
 				sim.print_message(data.response, sim.message_types.error);
 			}
 			else{
 				sim.print_message(data, sim.message_types.error);
-			}*/
+			}
 		},
 		error:function(data){
 			sim.print_message(data.responseText, sim.message_types.error);
 		}
 	});
 	
+};
+
+sim.load_supermarketlist_detail = function(id){
+	$.ajax({
+		url: sim.rest_uri + 'marketList/details',
+		type: 'GET',
+		data: {"id_supermarket" : id},
+		success : function(data) {
+			sim.loading(false);
+			if(data.marketListDetails){
+				sim.loading(true);
+				var details_array = Object.prototype.toString.call( data.marketListDetails ) === '[object Array]' ? data.marketListDetails : [data.marketListDetails];
+					//$( "#sim_accordion" ).append(tpl_supermarket_list_detail(supermarket_array[i]));
+					$( "#sim_accordion #div_"+id).empty();
+					$( "#sim_accordion #div_"+id).html(tpl_supermarket_list_detail(details_array));
+				sim.loading(false);
+			}
+			else if(data.response){
+				sim.print_message(data.response, sim.message_types.error);
+			}
+			else{
+				sim.print_message(data, sim.message_types.error);
+			}
+		},
+		error:function(data){
+			sim.print_message(data.responseText, sim.message_types.error);
+		}
+	});
 };
 
 /************************ OTHERS FUNCTIONS **********************************/
@@ -543,7 +646,7 @@ sim.validanumber = function (number){
 };
 
 sim.validaletters = function(letters){
-    var filter=/^[A-Za-zàèìòùáéíóú]+$/;
+    var filter=/^[A-Za-zÃ Ã¨Ã¬Ã²Ã¹Ã¡Ã©Ã­Ã³Ãº]+$/;
     if (filter.test(letters)){
         return true;
     }
@@ -553,7 +656,7 @@ sim.validaletters = function(letters){
 sim.validal = function(e) { // 1
     tecla = (document.all) ? e.keyCode : e.which; // 2
     if (tecla==8) return true; // 3
-    patron =/[A-Za-z\s'àèìòùáéíóú\t]/; // 4
+    patron =/[A-Za-z\s'Ã Ã¨Ã¬Ã²Ã¹Ã¡Ã©Ã­Ã³Ãº\t]/; // 4
     te = String.fromCharCode(tecla); // 5
     return patron.test(te); // 6
 };
@@ -598,6 +701,32 @@ sim.loading = function(state){
     }
 };
 
+sim.showLocation = function(position) {
+  sim.latitude = position.coords.latitude;
+  sim.longitude = position.coords.longitude;
+};
+
+sim.errorHandler = function(err) {
+  if(err.code == 1) {
+    alert("Error: Access is denied!");
+  }else if( err.code == 2) {
+    alert("Error: Position is unavailable!");
+  }
+};
+
+sim.getLocation = function(){
+	
+   if(navigator.geolocation){
+      // timeout at 60000 milliseconds (60 seconds)
+      var options = {timeout:10000};
+      navigator.geolocation.getCurrentPosition(sim.get_offers, 
+                                               sim.errorHandler,
+                                               options);
+   }else{
+      sim.print_message("Sorry, browser does not support geolocation!", sim.message_types.error);
+   }
+};
+
 sim.key_authentication = function(event){
 	if(event.keyCode == 13){
 		sim.loading(true);
@@ -606,32 +735,68 @@ sim.key_authentication = function(event){
 };
 
 sim.plus_quantity = function(id, detail){
-	var plus = $('#sim_input_quantity_'+id).val();
-	plus++;
-	$('#sim_input_quantity_'+id).val(plus);
-	$('#sim_label_quantity_'+id).html(plus);
-	
+	console.log(sim.db.carts[sim.current_id_user].listItem);
+	console.log(id);
+	console.log(detail);
 	if(detail){
-		sim.add_product_to_cart(id, '', true, true);
+		var band = 1;
+		for(var i = 0; i < sim.db.carts[sim.current_id_user].listItem.length; i++){
+			if(sim.db.carts[sim.current_id_user].listItem[i].id_product.id_product == id){
+				band = 0;
+				var pos = i;
+				console.log(pos);
+			}
+		}
+		//band = 1 The product is not in details table
+		if(!band){
+			var plus = parseInt(sim.db.carts[sim.current_id_user].listItem[pos].quantity);
+			//sim.db.carts[sim.current_id_user].listItem[pos].quantity++;
+			plus++;
+			$('#sim_label_quantity_detail_'+id).html(plus);
+			sim.add_product_to_cart(id, '', true, true);
+		}
+	}
+	else{
+		var plus = $('#sim_input_quantity_'+id).val();
+		plus++;
+		$('#sim_input_quantity_'+id).val(plus);
+		$('#sim_label_quantity_'+id).html(plus);
 	}
 };
 
 sim.minus_quantity = function(id, detail){
-	var minus = $('#sim_input_quantity_'+id).val();
-	if(minus > 0){
-		minus--;
-		$('#sim_input_quantity_'+id).val(minus);
-		$('#sim_label_quantity_'+id).html(minus);
-		
-		if(detail){
-			sim.add_product_to_cart(id, '', true, false);
+	
+	if(detail){
+		var band = 1;
+		for(var i = 0; i < sim.db.carts[sim.current_id_user].listItem.length; i++){
+			if(sim.db.carts[sim.current_id_user].listItem[i].id_product.id_product == id){
+				band = 0;
+				var pos = i;
+			}
 		}
-	}	
+		//band = 1 The product is not in details table
+		if(!band){
+			var minus = parseInt(sim.db.carts[sim.current_id_user].listItem[pos].quantity);
+			if(minus >= 1){
+				minus--;
+				$('#sim_label_quantity_detail_'+id).html(minus);
+				sim.add_product_to_cart(id, '', true, false);
+			}
+		}
+	}
+	else{
+		var minus = $('#sim_input_quantity_'+id).val();
+		if(minus >= 1){
+			minus--;
+			$('#sim_input_quantity_'+id).val(minus);
+			$('#sim_label_quantity_'+id).html(minus);
+		}
+	}
 };
 
 sim.add_product_to_cart = function(id, name, detail, plus){
 	sim.loading(true);
-	sim.buttons_state[id] = 1;
+	//sim.buttons_state[id] = 1;
 	var quantity = $('#sim_input_quantity_'+id).val();
 	if(quantity != '0'){
 		var object_cart = {};
@@ -648,7 +813,6 @@ sim.add_product_to_cart = function(id, name, detail, plus){
 			window.localStorage["carts"] = JSON.stringify(sim.db.carts);
 			window.localStorage["buttons_state"] = JSON.stringify(sim.buttons_state);
 			$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>1 PRODUCTS');
-			//$('#sim_product_add_button_'+id).css("display" , "none");
 		}
 		else{
 			var band = 1;
@@ -659,7 +823,7 @@ sim.add_product_to_cart = function(id, name, detail, plus){
 					var pos = i;
 				}
 			}
-			
+			//band = 1 The product is not in details table
 			if(band){
 				var pos = parseInt(sim.db.carts[sim.current_id_user].array_position);
 				sim.db.carts[sim.current_id_user].listItem[parseInt(sim.db.carts[sim.current_id_user].array_position)] = {};
@@ -682,23 +846,25 @@ sim.add_product_to_cart = function(id, name, detail, plus){
 					else{
 						parseInt(sim.db.carts[sim.current_id_user].listItem[pos].quantity);
 						sim.db.carts[sim.current_id_user].listItem[pos].quantity--;
+						if(sim.db.carts[sim.current_id_user].listItem[pos].quantity == 0 ){
+							$('#sim_product_detail_'+id).remove();
+						}
 					}
 				}
 				else{
-					sim.db.carts[sim.current_id_user].listItem[pos].quantity = $('#sim_input_quantity_'+id).val();
+					//sim.db.carts[sim.current_id_user].listItem[pos].quantity = $('#sim_input_quantity_'+id).val();
+					parseInt(sim.db.carts[sim.current_id_user].listItem[pos].quantity);
+					sim.db.carts[sim.current_id_user].listItem[pos].quantity = parseInt(sim.db.carts[sim.current_id_user].listItem[pos].quantity) + parseInt($('#sim_input_quantity_'+id).val());
 				}
-				if($('#sim_input_quantity_'+id).val() == 0 ){
-					$('#sim_product_detail_'+id).remove();
-				}
+				
 			}
 			window.localStorage["carts"] = JSON.stringify(sim.db.carts);
 			window.localStorage["buttons_state"] = JSON.stringify(sim.buttons_state);
-			console.log(JSON.stringify(sim.db.carts));
 		}
 		sim.loading(false);
 	}
 	else{
-		sim.print_message("Enter the desired product quantity", sim.message_types.information);
+		sim.print_message("Enter the desired product quantity", sim.message_types.error);
 	}
 	
 };
@@ -732,7 +898,6 @@ sim.delete_from_cart = function(id){
 			}
 			window.localStorage["carts"] = JSON.stringify(sim.db.carts);
 			window.localStorage["buttons_state"] = JSON.stringify(sim.buttons_state);
-			console.log(JSON.stringify(sim.db.carts));
 			sim.getuser();
 		}
 	}
@@ -741,6 +906,12 @@ sim.delete_from_cart = function(id){
 	}
 };
 
+sim.empty_cart = function(){
+	window.localStorage["carts"] = null;
+	window.localStorage["buttons_state"] = null;
+	sim.getuser();
+	alert("cart empty");
+};
 
 /***************************** TEMPLATES **************************************/
 var tpl_form_login = '<table border="0"><tr><td align="center"><span>email:</td><td></span><input class="ui-widget input ui-corner-all" type="text" id="login_username"></td></tr>';
@@ -818,11 +989,28 @@ var tpl_product = function(product_obj){
     html += '<div class="ui-widget-header">'+product_obj.name+' '+product_obj.brand+'</div><div>';
     html +='<div class="sim_image_div"><img src="./product_images/'+product_obj.id_product+'.jpg" class="sim_image_product"/></div>';
     html += '<hr></hr><div><span class = "sim_static_block_label">'+product_obj.quantity+' '+product_obj.measure_unit+'</span></div>';
-	html += '<div class="sim_product_add_button"><span id="sim_product_add_button_'+product_obj.id_product+'" class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id_product+', \''+product_obj.name+'\' , '+false+');">Add to Cart</span></div></div>';
+	html += '<div class="sim_product_add_button"><span id="sim_product_add_button_'+product_obj.id_product+'" class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id_product+', \''+product_obj.name+'\' , '+false+', '+false+');">Add to Cart</span></div></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-minus"></span></span></div>';
-    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product+'">0</span>';
-	html += '<input id="sim_input_quantity_'+product_obj.id_product+'" type="hidden" value="0"/></div>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product+'">1</span>';
+	html += '<input id="sim_input_quantity_'+product_obj.id_product+'" type="hidden" value="1"/></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
+	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-search"></span></span></div>';
+    html += '</div>';
+    return html;
+};
+
+var tpl_product_offer = function(product_obj){
+     var html ='<div class="ui-corner-tr sim_products_offer" id="sim_static_block_product_'+product_obj.id_product.id_product+'">';
+    html += '<div class="ui-widget-header">'+product_obj.id_product.name+' '+product_obj.id_product.brand+'</div>';
+    html +='<div class="sim_image_div"><img src="./product_images/'+product_obj.id_product.id_product+'.jpg" class="sim_image_product"/></div>';
+    html += '<hr></hr><div class="sim_header_offer">OFFER: '+product_obj.price+' â‚¬</div><div>';
+	html +='<div><span class = "sim_static_block_label">'+product_obj.id_product.quantity+' '+product_obj.id_product.measure_unit+'</span></div>';
+	html += '<div class="sim_product_add_button"><span id="sim_product_add_button_'+product_obj.id_product.id_product+'" class="ui-button ui-state-default ui-corner-all sim_product_add_button" onclick="sim.add_product_to_cart('+product_obj.id_product.id_product+', \''+product_obj.id_product.name+'\' , '+false+', '+false+');">Add to Cart</span></div></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id_product.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-minus"></span></span></div>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product.id_product+'">1</span>';
+	html += '<input id="sim_input_quantity_'+product_obj.id_product.id_product+'" type="hidden" value="1"/></div>';
+    html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
+	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-search"></span></span></div>';
     html += '</div>';
     return html;
 };
@@ -830,7 +1018,7 @@ var tpl_product = function(product_obj){
 var tpl_product_detail = function(product_obj){
 
 	var html = '<div class="sim_product_detail" id="sim_product_detail_'+product_obj.id_product.id_product+'"><div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.minus_quantity('+product_obj.id_product.id_product+', '+true+');"><span class="ui-icon ui-icon-circle-minus"></span></span></div>';
-    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product.id_product+'">'+product_obj.quantity+'</span>';
+    html +='<div class="sim_product_quantity"><span id="sim_label_quantity_detail_'+product_obj.id_product.id_product+'">'+product_obj.quantity+'</span>';
     html += '<input id="sim_input_quantity_'+product_obj.id_product.id_product+'" type="hidden" value="'+product_obj.quantity+'"/></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product.id_product+', '+true+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
 	html += '<div class="sim_product_quantity" >'+product_obj.id_product.name+'</div>';
@@ -858,4 +1046,25 @@ var tpl_supermarket_validate = function(){
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id+');"><span class="ui-icon ui-icon-circle-plus"></span></div>';
     html += '</div>';
     return html;
+};
+
+var tpl_supermarket_list = function(obj_supermarket){
+	var id = obj_supermarket.id_supermarket;
+	var html = '<h3 id="'+id+'">Supermarket: '+obj_supermarket.name+' ('+obj_supermarket.products_found+' Products found) Total: '+obj_supermarket.total+'</h3><div id="div_'+id+'"><p>Detail not available'+obj_supermarket.name+'</p></div>';
+	return html;
+};
+
+var tpl_supermarket_list_detail = function(supermarket_detail){
+	
+	var html = '<table border="0"><tr><td>Name Product</td><td>Quantity</td><td>Price</td></tr>';
+	//html += '<ul>';
+	for(var i = 0; i < supermarket_detail.length; i++){
+		var obj_detail = supermarket_detail[i];
+		var name = ''+obj_detail.name+' '+obj_detail.brand+' '+obj_detail.measure;
+		html +='<tr><td>'+name+'</td><td>'+obj_detail.quantity+'</td><td>'+obj_detail.price+'</td></tr>';
+		
+	}
+	html += '</tr></table>';
+	console.log(html);
+	return html;
 };

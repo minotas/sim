@@ -11,7 +11,7 @@ import it.polito.ai.spesainmano.DAOImp.PriceDAOImp;
 import it.polito.ai.spesainmano.DAOImp.UserDAOImp;
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.responses.InsertPriceResponse;
-import it.polito.ai.spesainmano.responses.MarketListDetails;
+import it.polito.ai.spesainmano.responses.MarketListDetail;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
 import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;

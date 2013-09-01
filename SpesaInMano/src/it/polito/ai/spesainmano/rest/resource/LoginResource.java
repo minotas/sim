@@ -31,7 +31,7 @@ private  LoginService loginService;
  * @return an user object containing the information when the login success
  * @throws CustomBadRequestException Generated when the email or password fields are empty
  * @throws CustomNotFoundException Generated when the user is not registered or the password is wrong
- * @throws CustomServiceUnavailable Generated when the service is not available
+ * @throws CustomServiceUnavailableException Generated when the service is not available
  */
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})

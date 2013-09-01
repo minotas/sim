@@ -5,7 +5,7 @@ import java.util.Map;
 
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.responses.Statistic;
-import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.StatisticService;
 import it.polito.ai.spesainmano.rest.serviceimpl.ProductServiceImpl;
 import it.polito.ai.spesainmano.rest.serviceimpl.StatisticServiceImpl;

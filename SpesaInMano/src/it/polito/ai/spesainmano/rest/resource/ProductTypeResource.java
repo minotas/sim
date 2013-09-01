@@ -4,7 +4,7 @@ package it.polito.ai.spesainmano.rest.resource;
 import java.util.List;
 import java.util.Map;
 import it.polito.ai.spesainmano.model.ProductType;
-import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.ProductTypeService;
 import it.polito.ai.spesainmano.rest.serviceimpl.ProductTypeServiceImpl;
 import javax.ws.rs.GET;
@@ -29,7 +29,7 @@ public class ProductTypeResource {
 	
 		if(!pathParams.containsKey("id_user")){
 	
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 	
 		}
 		

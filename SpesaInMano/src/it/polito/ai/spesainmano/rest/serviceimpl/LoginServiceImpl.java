@@ -32,7 +32,7 @@ public class LoginServiceImpl implements LoginService{
 	 * @param user An user object containing the user information to do the login
 	 * @return an user object containing the information when the login success
 	 * @throws CustomNotFoundException Generated when the user is not registered or the password is wrong
-	 * @throws CustomServiceUnavailable Generated when the service is not available
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
 	 */
 	@Override
 	public User login(User u) throws CustomNotFoundException, CustomServiceUnavailableException{

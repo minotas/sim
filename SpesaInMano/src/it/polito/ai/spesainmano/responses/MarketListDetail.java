@@ -3,7 +3,7 @@ package it.polito.ai.spesainmano.responses;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class MarketListDetails {
+public class MarketListDetail {
 	
 	String name;
 	String brand;

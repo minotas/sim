@@ -2,7 +2,7 @@ package it.polito.ai.spesainmano.rest.resource;
 
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.Product;
-import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.ProductService;
 import it.polito.ai.spesainmano.rest.serviceimpl.ProductServiceImpl;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ProductResource {
 		
 		if(!pathParams.containsKey("id_user")){
 			
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		
 		}
        
@@ -53,7 +53,7 @@ public class ProductResource {
 		
 		if(!pathParams.containsKey("id_user")){
 		
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		
 		}
 		productService = new ProductServiceImpl();
@@ -68,7 +68,7 @@ public class ProductResource {
 
 		Map<String, Cookie> pathParams = hh.getCookies();
 		if (!pathParams.containsKey("id_user")) {
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
 
 		productService = new ProductServiceImpl();
@@ -85,7 +85,7 @@ public class ProductResource {
 		
 		if(!pathParams.containsKey("id_user")){
 		
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		
 		}
 		

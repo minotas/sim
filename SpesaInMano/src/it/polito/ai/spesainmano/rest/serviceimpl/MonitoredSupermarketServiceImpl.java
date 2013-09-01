@@ -12,13 +12,7 @@ import it.polito.ai.spesainmano.rest.service.MonitoredSupermarketService;
 
 public class MonitoredSupermarketServiceImpl implements MonitoredSupermarketService{
 
-	@Override
-	public MonitoredSupermarket insert(MonitoredSupermarket ms) throws SQLException {
-		MonitoredSupermarketDAO monitoredSupermarketDao = new MonitoredSupermarketDAOImp();
-        return monitoredSupermarketDao.insert(ms);
-	}
-
-	@Override
+	
 	public List<MonitoredSupermarket> getSupermarkets(float latitude, float longitude, int userId) {
 		MonitoredSupermarketDAO monitoredSupermarketDao = new MonitoredSupermarketDAOImp();
         try {
@@ -30,7 +24,32 @@ public class MonitoredSupermarketServiceImpl implements MonitoredSupermarketServ
 
 	@Override
 	public void insertMonitoredSupermarkets(List<MonitoredSupermarket> msList, int userId) {
+		MonitoredSupermarketDAO monitoredSupermarketDao = new MonitoredSupermarketDAOImp();
+		try {
+			monitoredSupermarketDao.delete(msList, userId);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
+	}
+
+	@Override
+	public void deleteMonitoredSupermarkets(List<MonitoredSupermarket> msList, int userId) {
+		MonitoredSupermarketDAO monitoredSupermarketDao = new MonitoredSupermarketDAOImp();
+        monitoredSupermarketDao.insert(msList, userId);
+        return;
 		
+	}
+
+	@Override
+	public int getMonitoredSupermarketsNumber(int userId) {
+		MonitoredSupermarketDAO monitoredSupermarketDao = new MonitoredSupermarketDAOImp();
+        try {
+			return monitoredSupermarketDao.getMonitoredSupermarketsNumber(userId);
+		} catch (SQLException e) {
+			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		}
 	}
 
 

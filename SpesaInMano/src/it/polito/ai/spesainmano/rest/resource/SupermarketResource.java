@@ -1,7 +1,7 @@
 package it.polito.ai.spesainmano.rest.resource;
 
 import it.polito.ai.spesainmano.model.Supermarket;
-import it.polito.ai.spesainmano.rest.exception.CustomUnathorizedException;
+import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.SupermarketService;
 import it.polito.ai.spesainmano.rest.serviceimpl.SupermarketServiceImpl;
 import java.util.List;
@@ -29,7 +29,7 @@ public class SupermarketResource {
 		
 		if(!pathParams.containsKey("id_user")){
 		
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		
 		}
 		

@@ -8,10 +8,13 @@ import java.util.List;
 
 public interface MonitoredSupermarketService {
 	
-	MonitoredSupermarket insert(MonitoredSupermarket ms) throws SQLException;
-
+	
 	List<MonitoredSupermarket> getSupermarkets(float latitude, float longitude, int userId);
 
 	void insertMonitoredSupermarkets(List<MonitoredSupermarket> msList, int userId);
+
+	void deleteMonitoredSupermarkets(List<MonitoredSupermarket> msList, int userId);
+
+	int getMonitoredSupermarketsNumber(int userId);
 
 }

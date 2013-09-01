@@ -1,7 +1,7 @@
 package it.polito.ai.spesainmano.DAO;
 
 import it.polito.ai.spesainmano.model.Supermarket;
-import it.polito.ai.spesainmano.responses.MarketListDetails;
+import it.polito.ai.spesainmano.responses.MarketListDetail;
 import it.polito.ai.spesainmano.responses.SupermarketListPrice;
 
 import java.sql.SQLException;
@@ -17,6 +17,6 @@ public interface MarketListDAO{
 
 	public int getLastMarketListId(int idUser) throws SQLException;
 
-	public List<MarketListDetails> getDetails(int supermaketId, int marketListId) throws SQLException;
+	public List<MarketListDetail> getDetails(int supermaketId, int marketListId) throws SQLException;
 
 }

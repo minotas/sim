@@ -94,7 +94,7 @@ public class SupermarketDAOImpl implements SupermarketDAO {
 	PreparedStatement ps = null;
 	String query = "select s.id_supermarket, s.longitude, s.latitude, s.name "
 			+ "FROM supermarket s "
-			+ "WHERE SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120<=5000 "
+			+ "WHERE SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120<=2000 "
 			+ "ORDER BY SQRT(POWER((longitude-?),2)+POWER((latitude-?),2))*111120";
 	
 	List<Supermarket> supermarkets = new ArrayList<Supermarket>();

@@ -102,8 +102,9 @@ public class MonitoredSupermarketDAOImp implements MonitoredSupermarketDAO{
 					u.setId_user(0);
 				}
 				ms.setId_user(u);
-				rs.first();
+				rs.beforeFirst();
 				msList.add(ms);
+				
 			}
 			
 			return msList;
@@ -111,6 +112,84 @@ public class MonitoredSupermarketDAOImp implements MonitoredSupermarketDAO{
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
+	}
+
+	@Override
+	public void insert(List<MonitoredSupermarket> msList, int userId) {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "insert into monitored_supermarket(id_user,id_supermarket) values(?, ?)";
+		int insertsNumber = msList.size();
+		try{
+			ps = con.prepareStatement(query);
+	
+		for(int i = 0; i < insertsNumber; i++){
+			try {
+				
+				
+				ps.setInt(1, userId);
+				ps.setInt(2, msList.get(i).getId_supermarket().getId_supermarket());
+				ps.executeUpdate();
+				
+			}catch (SQLException e) {
+				 continue;
+			} 	
+		}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+		return;
+		
+	}
+
+	@Override
+	public void delete(List<MonitoredSupermarket> msList, int userId) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "delete from monitored_supermarket where id_user = ? and id_supermarket = ?";
+		int insertsNumber = msList.size();
+		try{
+			ps = con.prepareStatement(query);
+	
+		for(int i = 0; i < insertsNumber; i++){
+			try {
+				
+				ps.setInt(1, userId);
+				ps.setInt(2, msList.get(i).getId_supermarket().getId_supermarket());
+				ps.executeUpdate();
+				
+			}catch (SQLException e) {
+				 continue;
+			} 	
+		}
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+		return;
+		
+	}
+
+	@Override
+	public int getMonitoredSupermarketsNumber(int userId) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
+		PreparedStatement ps = null;
+		String query = "select count(*) "
+				+ "from monitored_supermarket "
+				+ "where id_user = ?";
+		try {
+			ps = con.prepareStatement(query);
+			ps.setInt(1, userId);
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			return rs.getInt(1);
+			
+		}finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
+		}
+	
 	}
 
 }

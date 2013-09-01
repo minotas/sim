@@ -1,5 +1,5 @@
 @CHARSET "ISO-8859-1";
-body { 
+#sim_body { 
     font-family: arial;
     margin: 0px;
     padding: 0px;
@@ -22,7 +22,7 @@ body {
 
 .sim_header_left,  .sim_header_login{
     color:#2e90bd;
-    height: 100px;
+    height: 120px;
     padding: 0 0 5px 0;
     position: relative;
     font-family:arial;
@@ -30,21 +30,56 @@ body {
 }
 
 .sim_header_left{
-    background: url(imgs/banner.png) no-repeat;
+    background: url(imgs/banner.png) no-repeat left bottom;
 }
 .sim_header{
-    background: url(imgs/banner-right.png);
+    background: url(imgs/banner-right.png) no-repeat bottom;
+}
+
+#sim_form_login .btn-user{
+	background: url(imgs/user-1.png) no-repeat left;
+	border-top: none;
+	color: #2e90bd;
+	font-size: 13px;
+	padding: 8px 15px 0 28px;
+	height: 32px;
+	width: 120px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+#sim_form_login .caret {
+	display: inline-block;
+	width: 2px;
+	height: 2px;
+	vertical-align: center;
+	border-top: 4px solid #000;
+	border-right: 4px solid transparent;
+	border-left: 4px solid transparent;
+	content: "";
+	opacity: .3;
+	filter: alpha(opacity=30);
+}
+
+#sim_form_login .dropdown-menu {
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+#sim_form_login .dropdown-menu {
+	margin: 0px;
 }
 
 #sim_dropdown_login{
 }
 
 #sim_cart{
-	width: 253px;
+	width: 343px;
 	height: 60px;
 	position: absolute;
 	right: 30px;
-	top: 24px;
+	top: 50px;
 	border-top: 1px solid;
 	border-right: 1px solid;
 	border-bottom: 1px solid;
@@ -60,6 +95,16 @@ body {
 	padding-right: 10px;
 	text-transform: uppercase;
 	float:left;
+}
+
+#sim_cart .sim_empty_cart{
+	background: url(imgs/line.png) no-repeat left bottom;
+	padding-left: 10px;
+	padding-top: 10px;
+	padding-right: 10px;
+	float:left;
+	cursor: pointer;
+	text-decoration: underline;
 }
 
 #sim_cart .sim_validate{
@@ -224,10 +269,6 @@ body {
     background-color: #F2F2F2;
 }
 
-#sim_body{
-	
-}
-
 #sim_body_offer{
 	font-family:arial;
     font-size:15px;
@@ -342,7 +383,7 @@ body {
 	height: 40px;
 }
 .sim_products{
-    height: 280px;
+    height: 340px;
     width: 180px;
     padding: 0 0 5px 0;
     border: 1px solid #ddd;
@@ -370,16 +411,51 @@ body {
 .sim_product_detail{
 	clear: both;
 	padding-bottom: 35px;
-	width: 290px;
+	width: 350px;
 }
 
 #sim_product_detail_trash{
 	float: right;
 	overflow: hide;
 }
+#sim_product_monitoring{
+	float: right;
+	overflow: hide;
+}
 
 .sim_image_div{
 	text-align: center;
+}
+
+.sim_image_div img{
+	max-height: 60%;
+	z-index: 2;
+	min-height: 165px; 
+	padding: 5px 0 5px 0;
+	max-width: 80%;
+	vertical-align: middle;
+	border: 0;
+}
+
+.sim_header_offer{
+	overflow: hide;
+	height: 20px;
+	background: #2191c0 url(images/ui-bg_gloss-wave_50_6eac2c_500x100.png) 50% 50% repeat-x;
+	color: #fff;
+}
+.sim_products_offer{
+    height: 350px;
+    width: 180px;
+    padding: 0 0 5px 0;
+    border: 1px solid #ddd;
+    overflow: auto;
+    margin: 5px;
+    float: left;
+    font-size: 15px;
+}
+.sim_products_offer .ui-widget-header{
+	overflow: hide;
+	height: 40px;
 }
 
 #sim_sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }

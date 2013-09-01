@@ -6,23 +6,28 @@
 	<link rel="shortcut icon" href="theme/default/imgs/favicon.png" />
 	<link href="theme/default/styles.css" type="text/css" rel="stylesheet" />
 	<link href="theme/default/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<link href="theme/default/bootstrap.min.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript" src="js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.js"></script>
 	<script type="text/javascript" src="js/md5.js"></script>
 	<script type="text/javascript" src="js/lib.js"></script>
-	<script type="text/javascript" src="jquery.carouFredSel.js"></script>
+	<script type="text/javascript" src="js/bootstrap-dropdown.min.js"></script>
 	
 </head>
-<body onload="sim.load_home();">
+<body id="sim_body" onload="sim.load_home();">
 	<div class="sim_box_shadow" style="background: white; position: relative">
 		<header>
 			 <div id="sim_header" class="sim_header">
 				<div class="sim_header_left" >
-					<div id="sim_form_login" ></div>
+					<div id="sim_form_login" class="">
+						
+					</div>
 					<div class="sim_cart" id="sim_cart" style="display:none;">
 						<div class="sim_number_products"><span id="sim_label_number_products"><p><strong>0 PRODUCTS</strong></p></span><input type="hidden" id="sim_input_number_products" value="0"/></div>
-						<!--<div class="sim_total"><p><strong>TOTAL: 0,00 €</strong></p></div>-->
+						<div class="sim_empty_cart">
+							<span onclick="sim.empty_cart();"><p>empty cart</p></span><input type="hidden" id="sim_input_number_products" value="0"/>
+						</div>
 						<div class="sim_validate">
 							<button id="sim_validate_button" class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all">
 								<span class="ui-button-text">validate</span>
@@ -35,13 +40,13 @@
 		<section id="sim_section">
 			<div class="sim_categories" id="sim_categories" style="display:none;">
 				<div onclick="">Offers
-					<div id="uno" style="display:none;">uno hola</div>
+					<div id="uno" style="display:none;"></div>
 				</div>
 			</div>
 			<div id="sim_nav" class="sim_nav" style="display:none;">
 				<span></span>
 			</div>
-			<div class="sim_body" id="sim_body">
+			<div>
 				<div id="sim_body_offers_external" style="display:none;">
 					<div id="sim_body_offers" ></div>
 				</div>
@@ -59,9 +64,10 @@
 		<div id="sim_messages" style="display:none;"></div>
 		<div id="sim_loading" style="display: none;"></div>
 		<div id="sim_send_cart" style="display:none;">
-			<p>Please confirm shipment of your cart. After it, you will be not able to make any changes into this cart.</p>
+			<p>Please confirm shipment of your cart. After it, you won't be able to make any changes into this cart.</p>
 			<p>confirm to shipment it or cancel</p>
 		</div>
+		<div id="sim_accordion" style="display:none;"></div>
 		
 		<!-- ************************** FORMS ***********************************************************-->
         <div id="sim_form_register" style="display:none;">
