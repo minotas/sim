@@ -43,7 +43,7 @@ public class LoginServiceImpl implements LoginService{
 		try {
 	    	user = userDao.login(u.getEmail(), u.getPassword());
 		} catch (SQLException e) {
-		  	throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+		  	throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	    
 	    if (user == null) {

@@ -1,5 +1,8 @@
 package it.polito.ai.spesainmano.responses;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Response {
 	private int number;
 

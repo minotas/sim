@@ -5,9 +5,6 @@ import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Supermarket;
 import it.polito.ai.spesainmano.responses.MarketListDetail;
 import it.polito.ai.spesainmano.responses.SupermarketListPrice;
-import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
-import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -2,12 +2,10 @@ package it.polito.ai.spesainmano.rest.serviceimpl;
 
 import java.sql.SQLException;
 import java.util.List;
-
 import it.polito.ai.spesainmano.DAO.CategoryDAO;
 import it.polito.ai.spesainmano.DAOImp.CategoryDAOImpl;
 import it.polito.ai.spesainmano.model.Category;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
-import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.CategoryService;
 
 /**

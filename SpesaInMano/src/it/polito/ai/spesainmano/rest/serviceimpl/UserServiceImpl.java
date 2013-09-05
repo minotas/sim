@@ -25,7 +25,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void validateRegisterForm(User user) throws CustomBadRequestException {
 		
-		if(user.getName().equals("") || user.getLastname().equals("")|| user.getEmail().equals("")  || user.getPassword().equals("")){
+		if(user.getName() == null || user.getName().equals("") || user.getLastname() == null || user.getLastname().equals("")|| 
+		   user.getEmail() == null || user.getEmail().equals("")  || user.getPassword() == null || user.getPassword().equals("")){
 			throw new CustomBadRequestException("Incomplete Information about the user");  
    	   	}
 		String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
@@ -80,7 +81,7 @@ public class UserServiceImpl implements UserService {
 			 }
 			
 		   	System.out.println(e.getMessage());
-			throw new CustomServiceUnavailableException("There was an error contacting an upstream server");			
+			throw new CustomServiceUnavailableException("Service Unavailable");			
 		}
 	}
 

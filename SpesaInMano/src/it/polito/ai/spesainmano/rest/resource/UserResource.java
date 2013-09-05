@@ -22,7 +22,7 @@ public class UserResource {
 	private UserService userService;
 
 	/**
-	 * Manages the post requests refers to the user registration
+	 * Manages the post requests about the user registration
 	 * 
 	 * @param user An user object containing the user information to do the registration
 	 * @return an user object containing the information of the user, including the id assigned.

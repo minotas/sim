@@ -37,6 +37,11 @@ $(function() {
                                    modal: true,
                                    buttons: { "send": function() { sim.clean_register(); var flag = sim.valida_form_register(); if(!flag){sim.new_user();} },
                                            "cancel": function() { $(this).dialog("close"); } } });
+	$( "#selectable" ).selectable({
+		stop:function(event, ui){
+			$(event.target).children('.ui-selected').not(':first').removeClass('ui-selected');
+		}
+	});
 	sim.getuser();
 });    
 
@@ -99,22 +104,6 @@ sim.new_user = function () {
     }
 };
 
-
-/*************************** INITIALIZE ****************************/
-sim.load_home = function (){
-	
-    sim.current_section = sim.sections.home;
-    if(sim.current_rol == sim.roles.guest){
-        $('#pri_form_login').html(tpl_form_login);
-    }
-    /*$.ajax({
-        url: 'home.html', 
-        success: function (data){
-            $('#pri_content_content').html(data);
-        }
-        });*/
-};
-
 sim.authentication = function(){
     var data_params = {};
     data_params.email = $('#login_username').val();
@@ -153,6 +142,8 @@ sim.change_auth = function(){
 	}
     switch(sim.current_rol){
     case sim.roles.guest:
+		$("#sim_section").hide();
+		$('#sim_section-2').show();
     	$('#sim_form_login').html(tpl_form_login);
     	$('#sim_cart').hide();
     	$("#sim_categories").hide();
@@ -160,10 +151,12 @@ sim.change_auth = function(){
     	$('#sim_body_body').hide();
     	$('#sim_body_menu').hide();
     	$('#sim_nav').hide();
-		$("#sim_categories").html('');
+		$("#sim_categories").empty();
 		break;
     case sim.roles.user:
 		sim.loading(false);
+		$('#sim_section-2').hide();
+		$("#sim_section").show();
 		$('#sim_cart').show();
 		$("#sim_categories").show();
 		$("#sim_body_offers_external").show();
@@ -173,45 +166,49 @@ sim.change_auth = function(){
     }
 };
 
+/********************** PRODUCTS ***********************************/
 sim.get_offers = function(position){
 	sim.latitude = position.coords.latitude;
 	sim.longitude = position.coords.longitude;
 	var data_params = {"latitude" : sim.latitude,
 			"longitude" : sim.longitude
 	};
-	console.log(data_params);
-	
-	$.ajax({
-        url: sim.rest_uri + 'price/offers',
-        type: 'GET',
-		data: data_params,
-        success : function(data) {
-			console.log(data);
-			var offers_array = Object.prototype.toString.call( data.price ) === '[object Array]' ? data.price : [data.price];
-            if(offers_array.length > 0){
-				$("#sim_nav").hide();
-				$("#sim_body_menu").hide();
-				$("#sim_body_body").hide();
-				$("#sim_body_offers").empty();
-            	for(var i = 1; i < offers_array.length; i++){
-					$("#sim_body_offers").append(tpl_product_offer(offers_array[i]));
+	//console.log(data_params);
+	if(sim.current_rol != sim.roles.guest){
+		$.ajax({
+			url: sim.rest_uri + 'price/offers',
+			type: 'GET',
+			data: data_params,
+			success : function(data) {
+				//console.log(data);
+				var offers_array = Object.prototype.toString.call( data.price ) === '[object Array]' ? data.price : [data.price];
+				if(offers_array.length > 0){
+					$("#sim_nav").hide();
+					$("#sim_body_menu").hide();
+					$("#sim_body_body").hide();
+					$("#sim_body_offers").empty();
+					for(var i = 1; i < offers_array.length; i++){
+						$("#sim_body_offers").append(tpl_product_offer(offers_array[i]));
+					}
+					$('#sim_body_offers').css("width", 10*192);
+					$("#sim_body_offers_external").show();
 				}
-				$('#sim_body_offers').css("width", 10*192);
-				$("#sim_body_offers_external").show();
-            }
-            else{
-                sim.print_message(data, sim.message_types.error);
-            }
-        },
-        error:function(data){
-			//alert("error");
-        	sim.print_message(data.responseText, sim.message_types.error);
-        }
-    });
+				else{
+					sim.print_message(data, sim.message_types.error);
+				}
+			},
+			error:function(data){
+				//alert("error");
+				sim.print_message(data.responseText, sim.message_types.error);
+			}
+		});
+	}
 	
 	//$("#sim_body_products").show();
 };
 
+
+/********************** CATEGORIES *******************************/
 sim.get_categories = function(){
 	$("#sim_categories").html('');
 	$("#sim_categories").append('<div class="sim_subcategory" onclick="sim.getuser();">Offers<div id="uno" style="display:none;">uno hola</div></div>');
@@ -306,6 +303,25 @@ sim.get_subcategory_products = function(id, name){
     });
 };
 
+
+/*************************** INITIALIZE ****************************/
+sim.load_home = function (){
+	
+    sim.current_section = sim.sections.home;
+    if(sim.current_rol == sim.roles.guest){
+        $('#pri_form_login').html(tpl_form_login);
+    }
+    /*$.ajax({
+        url: 'home.html', 
+        success: function (data){
+            $('#pri_content_content').html(data);
+        }
+        });*/
+};
+
+
+
+
 sim.load_products = function(){
 	var data = sim.db.products;
 	$("#sim_body_products").html('');
@@ -351,12 +367,13 @@ sim.logout = function(){
 
 sim.get_monitored_supermarket = function(){
 	$.ajax({
-        url: sim.rest_uri + 'monitoredSupermarket',
+        url: sim.rest_uri + 'monitoredSupermarket/number',
         type: 'GET',
         success : function(data) {
 			
 			if(data){
-				console.log(data);
+				sim.monitored_sumpermarket = data.number;
+				console.log(sim.monitored_sumpermarket);
 			
             }
             else{
@@ -405,7 +422,7 @@ sim.getuser = function(){
 						sim.db.carts[sim.current_id_user] = {array_position : 0, number_products : 0, listItem : [] };
 						window.localStorage.carts = JSON.stringify(sim.db.carts);
 					}
-					console.log(sim.db.carts);
+					//console.log(sim.db.carts);
 					
 				}
 			}
@@ -422,7 +439,7 @@ sim.getuser = function(){
 			sim.buttons_state = [];
 			window.localStorage["buttons_state"] = JSON.stringify(sim.buttons_state = []);
 		}*/
-		console.log(sim.current_id_user);
+		//console.log(sim.current_id_user);
 		$('#sim_label_number_products').html('<a href="javascript:;" onclick="sim.open_products_detail()" class="sim_ahref"><p><strong>'+sim.db.carts[sim.current_id_user].number_products+' PRODUCTS</strong></p></a>');
 	}
 	else{
@@ -493,7 +510,7 @@ sim.send_cart = function(){
 		type: 'POST',
 		contentType: 'application/json',
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 			sim.loading(false);
 			if(data.id){
 				sim.validate_cart();
@@ -514,48 +531,138 @@ sim.send_cart = function(){
 sim.validate_cart = function(){
 	//window.localStorage["carts"] = '';
 	//sim.getuser();
-	$.ajax({
-		url: sim.rest_uri + 'marketList',
-		type: 'GET',
-		success : function(data) {
-			sim.loading(false);
-			if(data.supermarketListPrice){
-				sim.loading(true);
-				var supermarket_array = Object.prototype.toString.call( data.supermarketListPrice ) === '[object Array]' ? data.supermarketListPrice : [data.supermarketListPrice];
-				$('#sim_body_menu').hide();
-				$('#sim_body_body').hide();
-				$('#sim_body_offers').html($('#sim_accordion'));
-				$( "#sim_accordion" ).empty();
-				for(var i = 0; i < supermarket_array.length; i++){
-					$( "#sim_accordion" ).append(tpl_supermarket_list(supermarket_array[i]));
-				}
-				$('#sim_body_offers').show();
-				$( "#sim_accordion" ).show();
-				$( "#sim_accordion" ).accordion({
-				  collapsible: true,
-				  active: false,
-				  heightStyle: "content",
-				  activate: function( event, ui ) { 
-					  //sim.load_supermarketlist_detail($(this).attr("id")); 
-					  var currentHeaderID = ui.newHeader.attr("id");
-					  console.log(currentHeaderID);
-					  sim.load_supermarketlist_detail(currentHeaderID); 
-				  }
-				});
+	
+	if(sim.monitored_sumpermarket != 0){
+		$.ajax({
+			url: sim.rest_uri + 'marketList',
+			type: 'GET',
+			success : function(data) {
 				sim.loading(false);
+				if(data.supermarketListPrice){
+					sim.loading(true);
+					var supermarket_array = Object.prototype.toString.call( data.supermarketListPrice ) === '[object Array]' ? data.supermarketListPrice : [data.supermarketListPrice];
+					$('#sim_body_menu').hide();
+					$('#sim_body_body').hide();
+					$('#sim_body_offers').html($('#sim_accordion'));
+					$( "#sim_accordion" ).empty();
+					for(var i = 0; i < supermarket_array.length; i++){
+						$( "#sim_accordion" ).append(tpl_supermarket_list(supermarket_array[i]));
+					}
+					$('#sim_body_offers').show();
+					$( "#sim_accordion" ).show();
+					$( "#sim_accordion" ).accordion({
+					  collapsible: true,
+					  active: false,
+					  heightStyle: "content",
+					  activate: function( event, ui ) { 
+						  //sim.load_supermarketlist_detail($(this).attr("id")); 
+						  var currentHeaderID = ui.newHeader.attr("id");
+						  //console.log(currentHeaderID);
+						  sim.load_supermarketlist_detail(currentHeaderID); 
+					  }
+					});
+					sim.loading(false);
+				}
+				else if(data.response){
+					sim.print_message(data.response, sim.message_types.error);
+				}
+				else{
+					sim.print_message(data, sim.message_types.error);
+				}
+			},
+			error:function(data){
+				sim.print_message(data.responseText, sim.message_types.error);
+			}
+		});
+	}
+	else{
+		sim.get_supermarket();
+		$('#sim_monitored_sumpermarket').dialog({  
+			title: "Selecting supermarket",
+			height: 380,
+			width: 550,
+			modal: true,
+			buttons: { "send": function() { 
+								
+								var supermarkets = Array();
+								$( "#selectable .ui-selected").each(function() {
+									supermarkets.push($( this ).attr('id'));
+								});
+								sim.send_supermarket(supermarkets);
+								$(this).dialog("close");},
+                       "cancel": function() { $(this).dialog("close"); } }
+		});
+	}
+	
+};
+
+sim.get_supermarket = function(){
+	var data_params = {"latitude" : sim.latitude,
+			"longitude" : sim.longitude
+	};
+	$.ajax({
+			url: sim.rest_uri + 'monitoredSupermarket',
+			type: 'GET',
+			data: data_params,
+			success : function(data) {
+				console.log(data);
+				if(data.monitoredSupermarket){
+					var supermarket_array = Object.prototype.toString.call( data.monitoredSupermarket ) === '[object Array]' ? data.monitoredSupermarket : [data.monitoredSupermarket];
+					for(var i = 0; i < supermarket_array.length; i++){
+						var supermarket = supermarket_array[i];
+						$('#selectable').append('<li class="ui-widget-content" id="'+supermarket.id_supermarket.id_supermarket+'" >'+supermarket.id_supermarket.name+'</li>');
+					}
+				}
+				else if(data.response){
+					sim.print_message(data.response, sim.message_types.error);
+				}
+				else{
+					sim.print_message(data, sim.message_types.error);
+				}
+			},
+			error:function(data){
+				sim.print_message(data.responseText, sim.message_types.error);
+			}
+		});
+};
+
+sim.send_supermarket = function(supermarkets){
+
+	data_params = {
+		"monitoredSupermarket" : []
+	};
+	for(var i = 0; i < supermarkets.length; i++){
+		var id_supermaket = {
+			"id_supermarket" : {"id_supermarket" : supermarkets[i]}
+		};
+		data_params.monitoredSupermarket.push(id_supermaket);
+	}
+	$.ajax({
+		url: sim.rest_uri + 'monitoredSupermarket',
+		data: JSON.stringify(data_params),
+		type: 'POST',
+		contentType: 'application/json',
+		success : function(data) {
+			console.log(data);
+			sim.get_monitored_supermarket();
+			sim.validate_cart();
+			/*sim.loading(false);
+			if(data.id){
+				sim.validate_cart();
 			}
 			else if(data.response){
 				sim.print_message(data.response, sim.message_types.error);
 			}
 			else{
 				sim.print_message(data, sim.message_types.error);
-			}
+			}*/
 		},
 		error:function(data){
 			sim.print_message(data.responseText, sim.message_types.error);
 		}
 	});
-	
+	console.log(data_params);
+
 };
 
 sim.load_supermarketlist_detail = function(id){
@@ -735,16 +842,16 @@ sim.key_authentication = function(event){
 };
 
 sim.plus_quantity = function(id, detail){
-	console.log(sim.db.carts[sim.current_id_user].listItem);
-	console.log(id);
-	console.log(detail);
+	//console.log(sim.db.carts[sim.current_id_user].listItem);
+	//console.log(id);
+	//console.log(detail);
 	if(detail){
 		var band = 1;
 		for(var i = 0; i < sim.db.carts[sim.current_id_user].listItem.length; i++){
 			if(sim.db.carts[sim.current_id_user].listItem[i].id_product.id_product == id){
 				band = 0;
 				var pos = i;
-				console.log(pos);
+				//console.log(pos);
 			}
 		}
 		//band = 1 The product is not in details table
@@ -913,6 +1020,88 @@ sim.empty_cart = function(){
 	alert("cart empty");
 };
 
+sim.monitoring_product = function(id_product, name){
+	sim.get_supermarket();
+	$('#sim_monitored_sumpermarket').dialog({  
+		title: "Selecting supermarket",
+		height: 380,
+		width: 550,
+		modal: true,
+		buttons: { "send": function() { 
+							
+							var supermarket = {};
+							$( "#selectable .ui-selected").each(function() {
+								supermarket.id_supermarket = ($( this ).attr('id'));
+							});
+							sim.send_monitoring_product(supermarket, id_product, name);
+							$(this).dialog("close");},
+				   "cancel": function() { $(this).dialog("close"); } }
+	});
+};
+
+sim.send_monitoring_product = function(supermarket, id_product, name){
+	sim.loading(true);
+	var data_param = {};
+	data_param.id_supermarket = supermarket.id_supermarket;
+	data_param.id_product = id_product;
+	$.ajax({
+		url: sim.rest_uri + 'statistic',
+		data : data_param,
+		type: 'GET',
+		success : function(data) {
+			console.log(data);
+			//sim.get_monitored_supermarket();
+			//sim.validate_cart();
+			sim.loading(false);
+			if(data.statistic){
+				var statistics = Object.prototype.toString.call( data.statistic ) === '[object Array]' ? data.statistic : [data.statistic];
+				sim.print_statistics(statistics, name);
+			}
+			else if(data.response){
+				sim.print_message(data.response, sim.message_types.error);
+			}
+			else{
+				sim.print_message(data, sim.message_types.error);
+			}
+		},
+		error:function(data){
+			sim.print_message(data.responseText, sim.message_types.error);
+		}
+	});
+	
+};
+
+sim.print_statistics = function(statistics, name){
+	console.log(statistics);
+	var data_statistic = Array();
+	data_statistic[0] = Array();
+	data_statistic[0][0] = 'Data';
+	data_statistic[0][1] = 'Price';
+	for(var i = 0; i < statistics.length; i++){
+		data_statistic[i+1] = Array();
+		data_statistic[i+1][0] = statistics[i].month;
+		data_statistic[i+1][1] = parseFloat(statistics[i].average);
+	}
+	
+	console.log(data_statistic);
+	sim.data = google.visualization.arrayToDataTable(data_statistic);
+
+        sim.options = {
+          title: ''+name,
+          hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+          vAxis: {minValue: 0}
+        };
+	$("#sim_monitored_product").dialog({  
+		title: "Monitoring product",
+		height: 540,
+		width: 690,
+		modal: false,
+		buttons: { "OK": function() { $(this).dialog("close"); } }
+	});
+	var chart = new google.visualization.LineChart(document.getElementById('sim_monitored_product'));
+        chart.draw(sim.data, sim.options);
+};
+
 /***************************** TEMPLATES **************************************/
 var tpl_form_login = '<table border="0"><tr><td align="center"><span>email:</td><td></span><input class="ui-widget input ui-corner-all" type="text" id="login_username"></td></tr>';
 tpl_form_login += '<tr><td align="center"><span>Password:</td><td></span><input class="ui-widget input ui-corner-all" type="password" onkeypress="sim.key_authentication(event)" id="login_password" style="weight:15px;">';
@@ -994,7 +1183,7 @@ var tpl_product = function(product_obj){
     html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product+'">1</span>';
 	html += '<input id="sim_input_quantity_'+product_obj.id_product+'" type="hidden" value="1"/></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
-	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-search"></span></span></div>';
+	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product+', \''+product_obj.name+'\');"><span class="ui-icon ui-icon-image"></span></span></div>';
     html += '</div>';
     return html;
 };
@@ -1010,7 +1199,7 @@ var tpl_product_offer = function(product_obj){
     html +='<div class="sim_product_quantity"><span id="sim_label_quantity_'+product_obj.id_product.id_product+'">1</span>';
 	html += '<input id="sim_input_quantity_'+product_obj.id_product.id_product+'" type="hidden" value="1"/></div>';
     html += '<div class="sim_product_quantity"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.plus_quantity('+product_obj.id_product.id_product+', '+false+');"><span class="ui-icon ui-icon-circle-plus"></span></span></div>';
-	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product.id_product+');"><span class="ui-icon ui-icon-search"></span></span></div>';
+	html += '<div class="sim_product_monitoring" id="sim_product_monitoring"><span class="ui-button ui-state-default ui-corner-all" onclick="sim.monitoring_product('+product_obj.id_product.id_product+', \''+product_obj.id_product.name+'\');"><span class="ui-icon ui-icon-image"></span></span></div>';
     html += '</div>';
     return html;
 };
@@ -1065,6 +1254,6 @@ var tpl_supermarket_list_detail = function(supermarket_detail){
 		
 	}
 	html += '</tr></table>';
-	console.log(html);
+	//console.log(html);
 	return html;
 };

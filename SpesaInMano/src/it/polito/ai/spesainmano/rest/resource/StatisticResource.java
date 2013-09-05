@@ -2,14 +2,10 @@ package it.polito.ai.spesainmano.rest.resource;
 
 import java.util.List;
 import java.util.Map;
-
-import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.responses.Statistic;
 import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.StatisticService;
-import it.polito.ai.spesainmano.rest.serviceimpl.ProductServiceImpl;
 import it.polito.ai.spesainmano.rest.serviceimpl.StatisticServiceImpl;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,13 +23,13 @@ public class StatisticResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public List<Statistic> getProductsByProductType(@QueryParam("id_supermarket") int supermarketId, @QueryParam("id_product") int productId, @Context HttpHeaders hh) {
 		
-	/*	Map<String, Cookie> pathParams = hh.getCookies();
+		Map<String, Cookie> pathParams = hh.getCookies();
 		
 		if(!pathParams.containsKey("id_user")){
 		
-			throw new CustomUnathorizedException("The user isn't logged in");
+			throw new CustomUnauthorizedException("The user isn't logged in");
 		
-		}*/
+		}
 		statisticService = new StatisticServiceImpl();
 		return statisticService.getAveragesLastSixMonths(supermarketId, productId);
 

@@ -6,7 +6,7 @@ import it.polito.ai.spesainmano.db.ConnectionPoolManager;
 import it.polito.ai.spesainmano.model.Price;
 import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.model.Supermarket;
-
+import it.polito.ai.spesainmano.responses.Statistic;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,15 +14,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Defines the functions required to the database access related with the prices
+ * @version 1.0
+ */
 public class PriceDAOImp implements PriceDAO {
 	Connection con;
 
+	/**
+	 * Inserts a new price in the database
+	 * @param p A price object containing the price information to required to add the price
+	 * @return When the insert success returns 1, otherwise 0
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
 	public int insert(Price p) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance()
 				.getConnectionFromPool();
 		PreparedStatement ps = null;
 		String query = "insert into price(id_user, id_supermarket, id_product, date, price, type) values(?, ?, ?, CURDATE(), ?, ?)";
+		
 		try {
 			ps = con.prepareStatement(query);
 			ps.setInt(1, p.getId_user().getId_user());
@@ -31,22 +42,29 @@ public class PriceDAOImp implements PriceDAO {
 			ps.setFloat(4, p.getPrice());
 			ps.setString(5, p.getType());
 			return ps.executeUpdate();
-
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 
 	}
 
+	/**
+	 * Gets the average and the standard deviation of the last 50 prices of a product 
+	 * @param p A price object containing the price information
+	 * @return A float array containing the average(position 0) and the standard deviation(position 1)
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
 	public float[] checkPrice(Price p) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
 		
-		String query = "select avg (price), std(price) from (select * from price where id_product=? and type != 'o' order by date desc limit 50)AS last_fifty_prices";
+		String query = "select avg (price), std(price) "
+				+ "from (select * "
+					+ "from price "
+					+ "where id_product=? and type != 'o' "
+					+ "order by date desc "
+					+ "limit 50)AS last_fifty_prices";
 		try {
 			ps = con.prepareStatement(query);
 			ps.setInt(1, p.getId_product().getId_product());
@@ -63,17 +81,21 @@ public class PriceDAOImp implements PriceDAO {
 
 			return data;
 
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-	
-	/*Selects the price of a product in the supermarkets located in an area of 1km of radio
-	 *Selects the price of a product in all the monitored supermakets
+	/**
+	 * Gets prices of a product in the supermarkets located in an area of 1km of radio given a position 
+	 * and in the monitored supermarkets by the user
+	 * @param userId The id of the user to obtain its monitored supermarkets
+	 * @param productId The id of the product
+	 * @param latitude The latitude of the current position of the user
+	 * @param longitude The longitude of the current position of the user
+	 * @param supermarketId The id of the supermarket in which the user is
+	 * @return The list of the current prices of the product in the near and monitored supermarkets
+	 * @throws SQLException Generated when there is any problem accessing the database
 	 */
 	@Override
 	public List<Price> getProductPriceInNearSupermarkets(int userId, int productId, float latitude, float longitude, int supermarketId) throws SQLException {
@@ -150,45 +172,73 @@ public class PriceDAOImp implements PriceDAO {
 				
 			}
 			return prices;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
 			ConnectionPoolManager.getPoolManagerInstance()
 					.returnConnectionToPool(con);
 		}
 	}
+	
+	
 
+	/**
+	 * Gets the average of the prices of the product in a given supermarket in the last 6 months
+	 * @param productId The id of the product
+	 * @param supermarketId The id of the supermarket
+	 * @return A list of statistic objects containing the month-year and average price of the product in the last 6 months
+	 * 		   in the supermarket.
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
-	public float getAverageLastSixMonths(int productId, int supermarketId)
-			throws SQLException {
-		con = ConnectionPoolManager.getPoolManagerInstance()
-				.getConnectionFromPool();
+	public List<Statistic> getAverageLastSixMonths(int supermarketId, int productId) throws SQLException{
+		
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = ("select avg(price) from price where id_product = ? and id_supermarket = ? and date > date(now()) - 180");
+		
+		String query = "select YEAR(date), MONTHNAME(date), avg(price) "
+					+ "from price where id_product = ? and id_supermarket = ? and date > DATE_SUB(CURDATE(),INTERVAL 6 MONTH) "
+					+ "group by YEAR(date), MONTH(date)";
 
-		ps = con.prepareStatement(query);
-		ps.setInt(1, productId);
-		ps.setInt(2, supermarketId);
-		ResultSet rs = ps.executeQuery();
-
-		if (rs.next()) {
-			return rs.getFloat(1);
-		} else {
-			return -1;
+		List<Statistic> statistics = new ArrayList<Statistic>();
+	
+		try {
+		
+			ps = con.prepareStatement(query);
+			ps.setInt(1, productId);
+			ps.setInt(2, supermarketId);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()){
+	           Statistic statistic = new Statistic();
+	           statistic.setMonth(rs.getString(2) + " " + rs.getString(1));
+	           statistic.setAverage(rs.getDouble(3));
+	           statistics.add(statistic);
+			}
+			
+		} finally{
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
+		return statistics;
 	}
-
+	
+	/**
+	 * Gets average, min, max and number of prices of a product in all the supermarkets in the last 6 months
+	 * @param productId The id of the product
+	 * @return A float array containing the average(position 0), min(position 1), max(position 2) and number
+	 * 		   of prices(position 3) 
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
-	public float[] getPriceQualityInfo(int productId, int supermarketId) throws SQLException {
-		con = ConnectionPoolManager.getPoolManagerInstance()
-				.getConnectionFromPool();
+	public float[] getPriceQualityInfo(int productId) throws SQLException {
+		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
-		String query = ("select avg(price), min(price), max(price), count(price) from price where id_product = ? and id_supermarket = ? and date > date(now()) - 180");
+		
+		String query = ("select avg(price), min(price), max(price), count(price) "
+				+ "from price "
+				+ "where id_product = ?  and date > DATE_SUB(CURDATE(),INTERVAL 6 MONTH)");
 
 		try {
 			ps = con.prepareStatement(query);
 			ps.setInt(1, productId);
-			ps.setInt(2, supermarketId);
 			ResultSet rs = ps.executeQuery();
 			float[] data = new float[4];
 			if (rs.next()) {
@@ -200,23 +250,27 @@ public class PriceDAOImp implements PriceDAO {
 			} 
 			return data;
 
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-	/*
-	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
-	 *Select the products that are in offer in the monitored supermarkets
-	 *Select the products that are in offer in the 3 most visited supermarkets
-	 */
+	
+	/**
+	 * Gets offers in the monitored and favourite supermarkets and the offers of monitored products
+	 * @param idUser The id of the user
+	 * @param latitude The latitude of the current location of the user
+	 * @param longitude The longitude the current location of the user
+	 * @return Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *		   Select the products that are in offer in the monitored supermarkets
+	 *		   Select the products that are in offer in the 3 most visited supermarkets
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
 	public List<Price> getOffersMonitored(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
+		
 		String query = "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
 					+ "from monitored_product mp, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
 						+ "from price p, ( "
@@ -264,6 +318,7 @@ public class PriceDAOImp implements PriceDAO {
 			ps.setInt(4, idUser);
 			ps.setInt(5, idUser);
 			ResultSet rs = ps.executeQuery();
+		
 			while(rs.next()){
 				Price price = new Price();
 				Product product = new Product();
@@ -280,21 +335,23 @@ public class PriceDAOImp implements PriceDAO {
 				prices.add(price);
 			}
 			return prices;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-	/*
-	 * Selects all the offer prices in the supermarkets that are in area of 2.5km radio 
-	 */
+	/**
+	 * Gets offers in the monitored and favourite supermarkets and the offers of monitored supermarkets
+	 * @param latitude The latitude of the current location of the user
+	 * @param longitude The longitude the current location of the user
+	 * @return Selects all the offer prices in the supermarkets that are in area of 2.5km radio 
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/	
 	@Override
 	public List<Price> getGeneralOffers(float longitude, float latitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
+		
 		String query = "select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
 						+ "from product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price "
 							+ "from price p, ( "
@@ -304,6 +361,7 @@ public class PriceDAOImp implements PriceDAO {
 								+ ") currentPrice "
 							+ "where p.id_price = currentPrice.id_price and p.type = 'o') oP "
 						+ "where op.id_product = pro.id_product and op.id_supermarket = s.id_supermarket and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=2500 ";
+		
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
@@ -327,20 +385,24 @@ public class PriceDAOImp implements PriceDAO {
 				prices.add(price);
 			}
 			return prices;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 
-	/*
-	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
-	 *Selects the products that are in offer in the monitored supermarkets
-	 *Selects the products that are in offer in the 3 most visited supermarkets
-	 *Selects the product in the market list that are in offer in the supermarkets located in an area of 5km of radio
-	 */
+	
+	/**
+	 * Gets offers in the monitored and favourite supermarkets and the offers of monitored and of all the products in the
+	 * market list
+	 * @param idUser The id of the user
+	 * @param latitude The latitude of the current location of the user
+	 * @param longitude The longitude the current location of the user
+	 * @return Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *		   Selects the products that are in offer in the monitored supermarkets
+	 *		   Selects the products that are in offer in the 3 most visited supermarkets
+	 *		   Selects the product in the market list that are in offer in the supermarkets located in an area of 5km of radio
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	@Override
 	public List<Price> getOffersProductsInOneList(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
@@ -392,6 +454,7 @@ public class PriceDAOImp implements PriceDAO {
 						+ "where p.id_price = currentPrice.id_price and p.type = 'o' ) oP "
 					+ "where pro.id_product = oP.id_product and s.id_supermarket = oP.id_supermarket "
 					+ "and ml.id_user = ? and ml.id_market_list = li.id_market_list and li.id_product = op.id_product  and (SQRT(POWER(s.longitude-?,2)+POWER(s.latitude-?,2)))*111120<=5000 ";
+		
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
@@ -421,25 +484,30 @@ public class PriceDAOImp implements PriceDAO {
 				prices.add(price);
 			}
 			return prices;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
 			ConnectionPoolManager.getPoolManagerInstance()
 					.returnConnectionToPool(con);
 		}
 	}
 	
+	/**
+	 * Gets offers in the monitored and favourite supermarkets and the offers of monitored and of all the products in the
+	 * market list
+	 * @param idUser The id of the user
+	 * @param latitude The latitude of the current location of the user
+	 * @param longitude The longitude the current location of the user
+	 * @return Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
+	 *		   Selects the products that are in offer in the monitored supermarkets
+	 *         Selects the products that are in offer in the 3 most visited supermarkets
+	 *         Selects the 5 most favourite products in the market lists that are in offer in the supermarkets located in an area of 5km of radio\
+	 * @throws SQLException Generated when there is any problem accessing the database
+	*/
 	
-	/*
-	 *Selects the monitored products that are in offer in the supermarkets located in an area of  5km of radio 
-	 *Selects the products that are in offer in the monitored supermarkets
-	 *Selects the products that are in offer in the 3 most visited supermarkets
-	 *Selects the 5 most favorite products in the market lists that are in offer in the supermarkets located in an area of 5km of radio
-	 */
 	@Override
 	public List<Price> getOffersProductsInMultipleLists(int idUser, float latitude, float longitude) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
+		
 		String query = "Select op.id_product, op.price, pro.name, pro.brand, pro.quantity, pro.measure_unit, s.name "
 					+ "from monitored_product mp, product pro, supermarket s, (select p.id_product, p.id_supermarket, p.price " 
 						+ "from price p, ( "
@@ -495,6 +563,7 @@ public class PriceDAOImp implements PriceDAO {
 									+ "order by count(*) desc "
 									+ "limit 5) favoriteProducts "
 								+ ") ";
+		
 		List<Price> prices = new ArrayList<Price>();
 		
 		try{
@@ -526,11 +595,8 @@ public class PriceDAOImp implements PriceDAO {
 				prices.add(price);
 			}
 			return prices;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
-			ConnectionPoolManager.getPoolManagerInstance()
-					.returnConnectionToPool(con);
+			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}
 	}
 }

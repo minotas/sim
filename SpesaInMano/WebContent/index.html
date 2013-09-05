@@ -10,9 +10,14 @@
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript" src="js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.js"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="js/md5.js"></script>
 	<script type="text/javascript" src="js/lib.js"></script>
 	<script type="text/javascript" src="js/bootstrap-dropdown.min.js"></script>
+	<script>
+		google.load("visualization", "1", {packages:["corechart"]});
+		console.log(google);
+	</script>
 	
 </head>
 <body id="sim_body" onload="sim.load_home();">
@@ -57,15 +62,27 @@
 					<div class="sim_pagination" style="display:none;"></div>
 				</div>
 			</div>
+			
+
+			<div id="sim_monitored_sumpermarket" style="display:none;">
+				<p class="feedback"><span>You have not monitored supermarkets yet.</span></p>
+				<p class="feedback"><span>Please select at least 1 supermarket</span></p>
+				<ol id="selectable" >
+				</ol>
+			</div>
+			<div id="sim_monitored_product" style="display:none;"></div>
 		</section>
+		
+		<section id="sim_section-2">logout</section>
+		
 		<footer>
 		</footer>
 		
 		<div id="sim_messages" style="display:none;"></div>
 		<div id="sim_loading" style="display: none;"></div>
 		<div id="sim_send_cart" style="display:none;">
-			<p>Please confirm shipment of your cart. After it, you won't be able to make any changes into this cart.</p>
-			<p>confirm to shipment it or cancel</p>
+			<p>Please confirm the shipment of your cart. After it, you won't be able to make any changes into this cart.</p>
+			<p>Pulse confirm to ship it or cancel to Cancel the shipment</p>
 		</div>
 		<div id="sim_accordion" style="display:none;"></div>
 		

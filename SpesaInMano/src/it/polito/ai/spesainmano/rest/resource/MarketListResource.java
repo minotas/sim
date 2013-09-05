@@ -107,8 +107,4 @@ public class MarketListResource {
 		return marketListService.getMarketListDetails(supermarketId, idUser);
 
 	}
-	
-	
-	
-
 }

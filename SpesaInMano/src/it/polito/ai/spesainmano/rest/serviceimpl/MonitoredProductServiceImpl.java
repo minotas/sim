@@ -47,7 +47,7 @@ public class MonitoredProductServiceImpl implements MonitoredProductService{
 	public void deleteMonitoredProducts(List<MonitoredProduct> mpList, User u) {
 		MonitoredProductDAO monitoredProductDao = new MonitoredProductDAOImp();
 		try {
-			monitoredProductDao.getDeleteMonitoredProducts(mpList, u);
+			monitoredProductDao.deleteMonitoredProducts(mpList, u);
 			return;
 		} catch (SQLException e) {
 			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");

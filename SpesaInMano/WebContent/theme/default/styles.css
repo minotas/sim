@@ -319,7 +319,7 @@
 	min-height: 330px;
     height: 100%;
 	border-radius: 3px 3px 3px 2px;
-	border: 1px #3b9ec7 solid;
+	border: 1px #000 solid;
 	background: #FAFAFA;
 	padding: 15px;
 	overflow: auto;
@@ -458,6 +458,13 @@
 	height: 40px;
 }
 
-#sim_sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-#sim_sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-#sim_sortable li span { position: absolute; margin-left: -1.3em; }
+.feedback { font-size: 1em; color: #FF0000;}
+#selectable .ui-selecting { background: #83C3E1; }
+#selectable .ui-selected { background: #46A5D2; color: white; }
+#selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+#selectable li { margin: 3px; padding: 0.4em; font-size: 1em; height: 25px; width: 400px;}
+
+.ui-dialog .ui-dialog-titlebar-close span {
+	display: block;
+	margin: 0px;
+}

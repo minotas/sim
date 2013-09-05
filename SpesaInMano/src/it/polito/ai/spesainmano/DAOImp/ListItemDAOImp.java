@@ -9,9 +9,19 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Defines the functions required to the database access related with the list item
+ * @version 1.0
+ */
 public class ListItemDAOImp implements ListItemDAO{
 	Connection con;
 
+	/**
+	 * Inserts a set of list items
+	 * @param listItems A Set of list items to be inserted
+	 * @param idList The id of the market list that includes the list items
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
 	public void insertListItems(List<ListItem> listItems, int idList) throws SQLException {
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
@@ -27,8 +37,6 @@ public class ListItemDAOImp implements ListItemDAO{
 				ps.executeUpdate();
 			}
 			
-		}catch (SQLException e) {
-			 throw e;
 		} finally{
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
 		}

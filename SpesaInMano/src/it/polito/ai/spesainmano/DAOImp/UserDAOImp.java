@@ -78,28 +78,30 @@ public class UserDAOImp implements UserDAO{
 		return u;
 	}
 
+	
+	/**
+	 * Gets the point of a user 
+	 * @param id The id of the user
+	 * @return The current points of a user
+	 * @throws SQLException Generated when there is any problem accessing the database
+	 */
 	@Override
 	public int getPoints(int id) throws SQLException{
 		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
 		PreparedStatement ps = null;
+		
 		String query = "select points from user where id_user = ?";
 		
 		try {
-		
 			ps = con.prepareStatement(query);
 			ps.setInt(1, id);
 			ResultSet rs = ps.executeQuery();
 		
 			if(rs.next()){
-			
 				return rs.getInt(1);
-			
 			}
-		
 		}finally{
-			
 			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
-		
 		}
 		
 		return -1;
@@ -132,44 +134,5 @@ public class UserDAOImp implements UserDAO{
 		
 		return false;
 	}
-
-	/*@Override
-	public User getUser(int id) throws SQLException {
-		
-		User u = null;
-		con = ConnectionPoolManager.getPoolManagerInstance().getConnectionFromPool();
-		PreparedStatement ps = null;
-		String query = "SELECT id_user, name, lastname, points FROM USER WHERE id_user = ?";
-		
-		try {
-		
-			ps = con.prepareStatement(query);
-			ps.setInt(1, id);
-			ResultSet rs = ps.executeQuery();
-			
-			if(rs.next()){
-		
-				u = new User();
-				u.setId_user(rs.getInt(1));
-				u.setName(rs.getString(2));
-				u.setLastname(rs.getString(3));
-		
-				u.setPoints(rs.getInt(4));
-		
-			}
-		
-		} catch (SQLException e) {
-		
-			throw e;
-		
-		} finally{
-		
-			ConnectionPoolManager.getPoolManagerInstance().returnConnectionToPool(con);
-		
-		}
-		
-		return u;
-	
-	}*/
 
 }

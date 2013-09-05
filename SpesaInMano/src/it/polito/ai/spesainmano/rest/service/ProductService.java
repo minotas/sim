@@ -5,8 +5,6 @@ import it.polito.ai.spesainmano.model.Product;
 import it.polito.ai.spesainmano.rest.exception.CustomBadRequestException;
 import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
-
-import java.sql.SQLException;
 import java.util.List;
 
 public interface ProductService {

@@ -12,6 +12,6 @@ public interface MonitoredProductDAO {
 
 	public List<MonitoredProduct> getMonitoredProducts(User u) throws SQLException;
 
-	public void getDeleteMonitoredProducts(List<MonitoredProduct> mpList, User u)throws SQLException;
+	public void deleteMonitoredProducts(List<MonitoredProduct> mpList, User u)throws SQLException;
 	
 }
