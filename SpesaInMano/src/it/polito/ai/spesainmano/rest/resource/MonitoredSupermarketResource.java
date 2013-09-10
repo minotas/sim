@@ -1,7 +1,8 @@
 package it.polito.ai.spesainmano.rest.resource;
 
 import it.polito.ai.spesainmano.model.MonitoredSupermarket;
-import it.polito.ai.spesainmano.responses.Response;
+import it.polito.ai.spesainmano.responses.NumberOfMonitoredSupermarketsResponse;
+import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.exception.CustomUnauthorizedException;
 import it.polito.ai.spesainmano.rest.service.MonitoredSupermarketService;
 import it.polito.ai.spesainmano.rest.serviceimpl.MonitoredSupermarketServiceImpl;
@@ -18,11 +19,21 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+/**
+ * Receives the requests related to the Monitored Supermarkets
+ * @version 1.0
+ */
 @Path("/monitoredSupermarket")
 public class MonitoredSupermarketResource {
 
 	private MonitoredSupermarketService monitoredSupermarketService;
 
+	/**
+	 * Manages the post requests about adding a set of monitored supermarkets by an user
+	 * @param msList A list of MonitoredSupermarket Object to be added containing all the required information
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
+	 * @throws CustomUnauthorizedException Generated when the user is not logged in
+	 */
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON}) 
 	@Produces({ MediaType.APPLICATION_JSON})
@@ -39,6 +50,13 @@ public class MonitoredSupermarketResource {
 
 	}
 	
+
+	/**
+	 * Manages the post requests about deleting a set of monitored supermarkets by an user
+	 * @param msList A list of MonitoredSupermarket Object to be deleted containing all the required information
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
+	 * @throws CustomUnauthorizedException Generated when the user is not logged in
+	 */
 	@Path("/delete")
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON}) 
@@ -59,7 +77,12 @@ public class MonitoredSupermarketResource {
 
 	}
 
-	
+	/**
+	 * Manages the get requests about getting the near supermarkets and which of them are monitored
+	 * @return A list of MonitoredSupermarkets objects 
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
+	 * @throws CustomUnauthorizedException Generated when the user is not logged in
+	*/	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<MonitoredSupermarket> getSupermarkets(@QueryParam("latitude") float latitude, @QueryParam("longitude") float longitude, @Context HttpHeaders hh) {
@@ -76,10 +99,16 @@ public class MonitoredSupermarketResource {
 		return monitoredSupermarketService.getSupermarkets(latitude, longitude,	userId);
 	}
 	
+	/**
+	 * Manages the get requests about getting the number of monitored supermarkets by an user
+	 * @return The number of monitored Supermarkets
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
+	 * @throws CustomUnauthorizedException Generated when the user is not logged in
+	*/	
 	@Path("/number")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getMonitoredSupermarketsNumber(@Context HttpHeaders hh) {
+	public NumberOfMonitoredSupermarketsResponse getMonitoredSupermarketsNumber(@Context HttpHeaders hh) {
 
 		Map<String, Cookie> pathParams = hh.getCookies();
 
@@ -91,7 +120,7 @@ public class MonitoredSupermarketResource {
 		monitoredSupermarketService = new MonitoredSupermarketServiceImpl();
 		
 		int number = monitoredSupermarketService.getMonitoredSupermarketsNumber(userId);
-		Response response = new Response();
+		NumberOfMonitoredSupermarketsResponse response = new NumberOfMonitoredSupermarketsResponse();
 		response.setNumber(number);
 		return response;
 	}

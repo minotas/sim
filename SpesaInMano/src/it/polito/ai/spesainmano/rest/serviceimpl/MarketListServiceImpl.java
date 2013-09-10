@@ -46,7 +46,7 @@ public class MarketListServiceImpl implements MarketListService{
 			return ml;
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 		
 	}
@@ -79,7 +79,7 @@ public class MarketListServiceImpl implements MarketListService{
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	}
 
@@ -108,7 +108,7 @@ public class MarketListServiceImpl implements MarketListService{
 		
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 		
 	}
@@ -129,8 +129,4 @@ public class MarketListServiceImpl implements MarketListService{
 		}
 		
 	}
-	
-	
-
-	
 }

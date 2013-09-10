@@ -2,7 +2,6 @@ package it.polito.ai.spesainmano.rest.serviceimpl;
 
 import java.sql.SQLException;
 import java.util.List;
-
 import it.polito.ai.spesainmano.DAO.MarketListDAO;
 import it.polito.ai.spesainmano.DAO.PriceDAO;
 import it.polito.ai.spesainmano.DAO.UserDAO;
@@ -16,6 +15,10 @@ import it.polito.ai.spesainmano.rest.exception.CustomNotFoundException;
 import it.polito.ai.spesainmano.rest.exception.CustomServiceUnavailableException;
 import it.polito.ai.spesainmano.rest.service.PriceService;
 
+/**
+ * Defines the functions related with the prices in the business logic
+ * @version 1.0
+ */
 public class PriceServiceImpl implements PriceService{
 
 	/**
@@ -170,10 +173,10 @@ public class PriceServiceImpl implements PriceService{
 				return r;
 			}
 			else{
-				throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+				throw new CustomServiceUnavailableException("Service Unavailable");
 			}
 		} catch (SQLException e) {
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	}
 	
@@ -211,7 +214,7 @@ public class PriceServiceImpl implements PriceService{
 			}
 			return prices;
 		} catch (SQLException e) {
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	}
 
@@ -285,9 +288,7 @@ public class PriceServiceImpl implements PriceService{
 			}
 			
 		}catch(SQLException sqle){
-			throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	}
-
-
 }

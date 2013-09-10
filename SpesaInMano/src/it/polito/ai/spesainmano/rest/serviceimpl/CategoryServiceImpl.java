@@ -28,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
 			return cDao.getCategories();
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			throw new CustomServiceUnavailableException("There was an error contacting an upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 		
 	}

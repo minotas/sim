@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
 			if (e.getErrorCode() == 1062) {
 				throw new CustomBadRequestException("This product already exist!");
 			} else
-				throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+				throw new CustomServiceUnavailableException("Service Unavailable");
 		}
 	}
 
@@ -252,7 +252,7 @@ public class ProductServiceImpl implements ProductService {
 	 * Implements the logic required to found the similar product in a specific supermarket of the given product
 	 * @param productId The id of the product
 	 * @param supermarketId The id of the supermarket in which will be done the search 
-	 * @return a List of Pricet objects containing the information of the similar products in the supermarket
+	 * @return a List of Price objects containing the information of the similar products in the supermarket
 	 * @throws CustomServiceUnavailableException Generated when the service is not available
 	 * @throws CustomNotFoundException Generated when the productId received does not corresponds to any product 
 	 * 		   registered or when there aren't similar product in the supermarket
@@ -275,10 +275,7 @@ public class ProductServiceImpl implements ProductService {
 			}
 			return prices;
 		} catch (SQLException e) {
-			throw new CustomServiceUnavailableException("Server received an invalid response from upstream server");
+			throw new CustomServiceUnavailableException("Service Unavailable");
 		}
-
-
 	}
-
 }

@@ -3,7 +3,7 @@ package it.polito.ai.spesainmano.responses;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Response {
+public class NumberOfMonitoredSupermarketsResponse {
 	private int number;
 
 	public int getNumber() {

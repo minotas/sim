@@ -27,84 +27,82 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/monitoredProduct")
 public class MonitoredProductResource {
-	
-private MonitoredProductService monitoredProductService;
-    
+
+	private MonitoredProductService monitoredProductService;
 
 	/**
 	 * Manages the post requests about creating a new monitored product for a user
-	 * @param listItems A list of items selected by the user in his market list.
-	 * @return 
+	 * @param mp A mpObject containing the information required to add the new monitored product
 	 * @throws CustomServiceUnavailableException Generated when the service is not available
 	 * @throws CustomUnauthorizedException Generated when the user is not logged in
 	 * @throws CustomBadRequestException Generated when the product is already monitored by the user
-	*/
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON})
-    @Produces({ MediaType.APPLICATION_JSON})
-    public MonitoredProduct create(MonitoredProduct mp, @Context HttpHeaders hh)throws CustomUnauthorizedException, CustomBadRequestException, CustomServiceUnavailableException{
-    	
-    	Map<String, Cookie> pathParams = hh.getCookies();
-    	
+	 */
+	@POST
+	@Consumes({ MediaType.APPLICATION_JSON})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public MonitoredProduct create(MonitoredProduct mp, @Context HttpHeaders hh)throws CustomUnauthorizedException, CustomBadRequestException, CustomServiceUnavailableException{
+
+		Map<String, Cookie> pathParams = hh.getCookies();
+
 		if(!pathParams.containsKey("id_user")){
 			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
-		
+
 		MonitoredProduct monP = mp;
 		User u = new User();
 		u.setId_user(Integer.parseInt(pathParams.get("id_user").getValue()));
 		monP.setId_user(u); 
- 	    monitoredProductService= new MonitoredProductServiceImpl();
-        return monitoredProductService.insert(mp);
-        
-		    
-    }
-    
-    /**
+		monitoredProductService= new MonitoredProductServiceImpl();
+		return monitoredProductService.insert(mp);
+
+
+	}
+
+	/**
 	 * Manages the get requests about getting all the monitored products by an user
 	 * @return A list of MonitoredProducts objects 
 	 * @throws CustomServiceUnavailableException Generated when the service is not available
 	 * @throws CustomUnauthorizedException Generated when the user is not logged in
 	 * @throws CustomBadRequestException Generated when the product is already monitored by the user
-	*/
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON})
-    public List<MonitoredProduct> getMonitoredProducts(@Context HttpHeaders hh) throws CustomServiceUnavailableException, CustomUnauthorizedException, CustomBadRequestException
-    {
-    	Map<String, Cookie> pathParams = hh.getCookies();
-    	
+	 */
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON})
+	public List<MonitoredProduct> getMonitoredProducts(@Context HttpHeaders hh) throws CustomServiceUnavailableException, CustomUnauthorizedException, CustomBadRequestException
+	{
+		Map<String, Cookie> pathParams = hh.getCookies();
+
 		if(!pathParams.containsKey("id_user")){
 			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
-		
+
 		User u = new User();
 		u.setId_user(Integer.parseInt(pathParams.get("id_user").getValue()));
 		monitoredProductService= new MonitoredProductServiceImpl();
-        return monitoredProductService.getMonitoredProducts(u);
-		    
-    }
-   
-    /**
-   	 * Manages the post requests about delete a group of monitored products
-   	 * @throws CustomServiceUnavailableException Generated when the service is not available
-   	 * @throws CustomUnauthorizedException Generated when the user is not logged in
-   	*/
-    @Path("/delete")
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    public void deleteMonitoredProducts(List<MonitoredProduct> mpList,  @Context HttpHeaders hh) throws CustomUnauthorizedException, CustomServiceUnavailableException{
-    	Map<String, Cookie> pathParams = hh.getCookies();
-    	
+		return monitoredProductService.getMonitoredProducts(u);
+
+	}
+
+	/**
+	 * Manages the post requests about delete a group of monitored products
+	 * @throws CustomServiceUnavailableException Generated when the service is not available
+	 * @throws CustomUnauthorizedException Generated when the user is not logged in
+	 */
+	@Path("/delete")
+	@POST
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public void deleteMonitoredProducts(List<MonitoredProduct> mpList,  @Context HttpHeaders hh) throws CustomUnauthorizedException, CustomServiceUnavailableException{
+		Map<String, Cookie> pathParams = hh.getCookies();
+
 		if(!pathParams.containsKey("id_user")){
 			throw new CustomUnauthorizedException("The user isn't logged in");
 		}
-		
+
 		User u = new User();
 		u.setId_user(Integer.parseInt(pathParams.get("id_user").getValue()));
 		monitoredProductService= new MonitoredProductServiceImpl();
-        monitoredProductService.deleteMonitoredProducts(mpList, u);
-        return;
-		    
-    }
-    
+		monitoredProductService.deleteMonitoredProducts(mpList, u);
+		return;
+
+	}
+
 }
